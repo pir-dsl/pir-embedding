@@ -70,7 +70,7 @@ case class LireText(val p: Location) extends FeatureContainer[LireText] {
 }
 
 trait LireFeature {
-  def getFeature(image: LireImage, scaleWidth: Int, scaleHeight: Int) = {
+  def getFeature(image: LireImage, scaleWidth: Int, scaleHeight: Int) : BufferedImage = {
     var bufferedImage = image.getFeature
     try {
       if (bufferedImage != null) {
