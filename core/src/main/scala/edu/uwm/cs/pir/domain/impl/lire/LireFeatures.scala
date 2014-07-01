@@ -1,6 +1,6 @@
 package edu.uwm.cs.pir.domain.impl.lire
 
-import edu.uwm.cs.pir.Constants
+import edu.uwm.cs.pir._
 import edu.uwm.cs.pir.domain._
 import edu.uwm.cs.pir.utils.GeneralUtils._
 import edu.uwm.cs.pir.utils.IndexUtils
@@ -8,6 +8,8 @@ import edu.uwm.cs.pir.utils.AWSS3API
 import edu.uwm.cs.pir.utils.AWSS3API.AWSS3Config
 import edu.uwm.cs.pir.utils.ImageUtils
 import edu.uwm.cs.pir.utils.FileUtils
+import edu.uwm.cs.pir.domain.features._
+import edu.uwm.cs.pir.domain.features.concrete._
 
 import java.awt.image.BufferedImage
 import java.io.IOException
@@ -24,10 +26,18 @@ import edu.uwm.cs.mir.prototypes.feature.utils.FeatureUtils
 trait FeatureContainer[X]
 trait ContainerFeature { type Feature[X] = FeatureContainer[X] }
 
-case class Location(val url: String, val awsS3Config: AWSS3Config)
-
-class LireImage(val p: Location) extends FeatureContainer[LireImage] {
-  def getFeature: BufferedImage = {
+class LireImage(val p: Location) extends Image (p) with IFeature {
+  
+  //type T = Location 
+ // type T1 = Location  
+  //type T2 = Location 
+	//type Concrete[T] = Image
+	//def f_getFeature : Concrete[T]
+	//def f_compare : Boolean
+	def f_transform (in : Concrete[T1]) = {_}
+  
+  
+  def f_getFeature: BufferedImage = {
     var image: BufferedImage = null
     try {
       if (p.awsS3Config.is_s3_storage) {
@@ -71,7 +81,7 @@ case class LireText(val p: Location) extends FeatureContainer[LireText] {
 
 trait LireFeature {
   def getFeature(image: LireImage, scaleWidth: Int, scaleHeight: Int) : BufferedImage = {
-    var bufferedImage = image.getFeature
+    var bufferedImage = image.f_getFeature
     try {
       if (bufferedImage != null) {
         val imageType = if (bufferedImage.getType == 0) BufferedImage.TYPE_INT_ARGB else bufferedImage.getType
@@ -142,7 +152,7 @@ case class LireSIFT() {
   def getFeature(image: LireImage, scaleWidth: Int = Constants.SCALE_WIDTH, scaleHeight: Int = Constants.SCALE_HEIGHT): SIFTWrapper = {
     var features: List[Feature] = null
     try {
-      var bufferedImage = image.getFeature
+      var bufferedImage = image.f_getFeature
       // When this is null, the jpg file cannot be processed
       if (bufferedImage != null) {
         val imageType = if (bufferedImage.getType == 0) BufferedImage.TYPE_INT_ARGB else bufferedImage.getType

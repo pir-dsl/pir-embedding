@@ -15,6 +15,7 @@ import edu.uwm.cs.pir.utils.AWSS3API.AWSS3Config
 import edu.uwm.cs.pir.utils.ImageUtils
 
 import edu.uwm.cs.pir.domain.impl.lire._
+import edu.uwm.cs.pir.domain.features.concrete._
 
 //Test implementation of the MIR domain functions
 case class MIRFunction (val scaleWidth : Int, val scaleHeight : Int) extends ImageQueryFunction with ContainerFeature {
