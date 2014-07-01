@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="core/src/main/scala"/>
+	<classpathentry kind="src" path="core/src/main/resources"/>
 	<classpathentry kind="src" path="core/src/test/scala"/>
-	<classpathentry kind="src" path="project"/>
-	<classpathentry kind="lib" path="assembly/target/scala-2.10/cache/assembly/global/assembly/0e0dcef44b0c3d786737457110550d34721d64e4_1b624c2db8eb3a40d84362f22c2078ebde3e8c81/minlog-1.2.jar"/>
-	<classpathentry kind="lib" path="assembly/target/scala-2.10/cache/assembly/global/assembly/0e0dcef44b0c3d786737457110550d34721d64e4_1b624c2db8eb3a40d84362f22c2078ebde3e8c81/objenesis-1.2.jar"/>
-	<classpathentry kind="lib" path="assembly/target/scala-2.10/cache/assembly/global/assembly/0e0dcef44b0c3d786737457110550d34721d64e4_1b624c2db8eb3a40d84362f22c2078ebde3e8c81/reflectasm-1.07-shaded.jar"/>
-	<classpathentry kind="lib" path="assembly/target/scala-2.10/pir-assembly-0.2.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="core/custom_lib/colt.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/dom4j-2.0.0-ALPHA-2.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/DSL_MIR-0.0.1-SNAPSHOT.jar"/>
@@ -17,9 +14,6 @@
 	<classpathentry kind="lib" path="core/custom_lib/mallet.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/slf4j-api-1.7.2.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/slf4j-log4j12-1.6.2.jar"/>
-	<classpathentry kind="lib" path="lib_managed/bundles/config-1.0.2.jar"/>
-	<classpathentry kind="lib" path="lib_managed/bundles/kryo-2.22.jar"/>
-	<classpathentry kind="lib" path="lib_managed/bundles/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/aws-java-sdk-1.4.7.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/cglib-nodep-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/commons-codec-1.3.jar"/>
@@ -46,9 +40,7 @@
 	<classpathentry kind="lib" path="lib_managed/jars/xercesImpl-2.8.1.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/xml-apis-1.3.03.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/xmpcore-5.1.2.jar"/>
-	<classpathentry kind="lib" path="sbt/sbt-launch-0.11.3-2.jar"/>
 	<classpathentry kind="lib" path="spark/spark-assembly_2.10-0.9.0-incubating-hadoop1.0.4.jar"/>
 	<classpathentry kind="lib" path="spark/spark-assembly_2.10-0.9.0-incubating.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="target"/>
 </classpath>
