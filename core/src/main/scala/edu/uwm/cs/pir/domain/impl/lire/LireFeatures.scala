@@ -21,23 +21,15 @@ import scala.collection.JavaConverters._
 
 //TODO: Need to refactor the below
 import edu.uwm.cs.mir.prototypes.feature.lire.utils.LireFeatureUtils
-import edu.uwm.cs.mir.prototypes.feature.utils.FeatureUtils
 
-trait FeatureContainer[X]
-trait ContainerFeature { type Feature[X] = FeatureContainer[X] }
+//trait FeatureContainer[X]
+//trait ContainerFeature { type Feature[X] = FeatureContainer[X] }
 
-class LireImage(val p: Location) extends Image (p) with IFeature {
-  
-  //type T = Location 
- // type T1 = Location  
-  //type T2 = Location 
-	//type Concrete[T] = Image
-	//def f_getFeature : Concrete[T]
-	//def f_compare : Boolean
-	def f_transform (in : Concrete[T1]) = {_}
-  
-  
-  def f_getFeature: BufferedImage = {
+class LireImage(val p: Location) extends IFeature with IImage[Location] {
+  type T = BufferedImage
+  type Concrete[T] = IImage[BufferedImage]
+
+  def f_getFeature: IImage[BufferedImage] = {
     var image: BufferedImage = null
     try {
       if (p.awsS3Config.is_s3_storage) {
@@ -55,14 +47,14 @@ class LireImage(val p: Location) extends Image (p) with IFeature {
       case ex: IOException => new RuntimeException(ex)
 
     }
-    image
+    new Image(image)
   }
 
   //override def compareTo(other: LireImage) = 1
 }
 
-case class LireText(val p: Location) extends FeatureContainer[LireText] {
-  def getFeature: String = {
+case class LireText(val p: Location) extends IFeature with IText[Location] {
+  def getFeature: IText[String] = {
     var text: String = null
     if (p.awsS3Config.is_s3_storage) {
       val amazonS3Client = AWSS3API.getAmazonS3Client(p.awsS3Config)
@@ -75,13 +67,13 @@ case class LireText(val p: Location) extends FeatureContainer[LireText] {
         case ex: IOException => new RuntimeException(ex)
       }
     }
-    text
+    new Text(text)
   }
 }
 
-trait LireFeature {
-  def getFeature(image: LireImage, scaleWidth: Int, scaleHeight: Int) : BufferedImage = {
-    var bufferedImage = image.f_getFeature
+object FeatureUtils {
+  def getFeature(image: LireImage, scaleWidth: Int, scaleHeight: Int): BufferedImage = {
+    var bufferedImage = image.f_getFeature.getFeature
     try {
       if (bufferedImage != null) {
         val imageType = if (bufferedImage.getType == 0) BufferedImage.TYPE_INT_ARGB else bufferedImage.getType
@@ -95,64 +87,68 @@ trait LireFeature {
   }
 }
 
-case class CEDDWrapper(cedd: net.semanticmetadata.lire.imageanalysis.CEDD) extends FeatureContainer[CEDDWrapper]
-case class LireCEDD(val scaleWidth: Int, val scaleHeight: Int) extends LireFeature with FeatureContainer[LireCEDD] {
-  def getFeature(image: LireImage): CEDDWrapper = {
-    val bufferedImage = super.getFeature(image, scaleWidth, scaleHeight)
+case class LireCEDD(val scaleWidth: Int, val scaleHeight: Int) extends IFeature with IComparable[net.semanticmetadata.lire.imageanalysis.CEDD] {
+  def getFeature(image: LireImage): IDocument[net.semanticmetadata.lire.imageanalysis.CEDD] = {
+    val bufferedImage = FeatureUtils.getFeature(image, scaleWidth, scaleHeight)
     val lireFeature = new net.semanticmetadata.lire.imageanalysis.CEDD
     lireFeature.extract(bufferedImage)
-    CEDDWrapper(lireFeature)
+    new IDocument[net.semanticmetadata.lire.imageanalysis.CEDD] {
+      override def compareTo(other: IComparable[net.semanticmetadata.lire.imageanalysis.CEDD]) = false
+    }
   }
 }
 
-case class FCTHWrapper(fcth: net.semanticmetadata.lire.imageanalysis.FCTH) extends FeatureContainer[FCTHWrapper]
-case class LireFCTH(val scaleWidth: Int, val scaleHeight: Int) extends LireFeature with FeatureContainer[LireFCTH] {
-  def getFeature(image: LireImage): FCTHWrapper = {
-    val bufferedImage = super.getFeature(image, scaleWidth, scaleHeight)
+case class LireFCTH(val scaleWidth: Int, val scaleHeight: Int) extends IFeature with IComparable[net.semanticmetadata.lire.imageanalysis.FCTH] {
+  def getFeature(image: LireImage): IDocument[net.semanticmetadata.lire.imageanalysis.FCTH] = {
+    val bufferedImage = FeatureUtils.getFeature(image, scaleWidth, scaleHeight)
     val lireFeature = new net.semanticmetadata.lire.imageanalysis.FCTH
     lireFeature.extract(bufferedImage)
-    FCTHWrapper(lireFeature)
+    new IDocument[net.semanticmetadata.lire.imageanalysis.FCTH] {
+      override def compareTo(other: IComparable[net.semanticmetadata.lire.imageanalysis.FCTH]) = false
+    }
   }
 }
 
-case class ColorLayoutWrapper(cedd: net.semanticmetadata.lire.imageanalysis.ColorLayout) extends FeatureContainer[ColorLayoutWrapper]
-case class LireColorLayout(val scaleWidth: Int, val scaleHeight: Int) extends LireFeature with FeatureContainer[LireColorLayout] {
-  def getFeature(image: LireImage): ColorLayoutWrapper = {
-    val bufferedImage = super.getFeature(image, scaleWidth, scaleHeight)
+case class LireColorLayout(val scaleWidth: Int, val scaleHeight: Int) extends IFeature with IComparable[net.semanticmetadata.lire.imageanalysis.ColorLayout] {
+  def getFeature(image: LireImage): IDocument[net.semanticmetadata.lire.imageanalysis.ColorLayout] = {
+    val bufferedImage = FeatureUtils.getFeature(image, scaleWidth, scaleHeight)
     val lireFeature = new net.semanticmetadata.lire.imageanalysis.ColorLayout
     lireFeature.extract(bufferedImage)
-    ColorLayoutWrapper(lireFeature)
+    new IDocument[net.semanticmetadata.lire.imageanalysis.ColorLayout] {
+      override def compareTo(other: IComparable[net.semanticmetadata.lire.imageanalysis.ColorLayout]) = false
+    }
   }
 }
 
-case class EdgeHistogramWrapper(edgeHistogram: net.semanticmetadata.lire.imageanalysis.EdgeHistogram) extends FeatureContainer[EdgeHistogramWrapper]
-case class LireEdgeHistogram(val scaleWidth: Int, val scaleHeight: Int) extends LireFeature with FeatureContainer[LireEdgeHistogram] {
-  def getFeature(image: LireImage): EdgeHistogramWrapper = {
-    val bufferedImage = super.getFeature(image, scaleWidth, scaleHeight)
+case class LireEdgeHistogram(val scaleWidth: Int, val scaleHeight: Int) extends IFeature with IComparable[net.semanticmetadata.lire.imageanalysis.EdgeHistogram] {
+  def getFeature(image: LireImage): IDocument[net.semanticmetadata.lire.imageanalysis.EdgeHistogram] = {
+    val bufferedImage = FeatureUtils.getFeature(image, scaleWidth, scaleHeight)
     val lireFeature = new net.semanticmetadata.lire.imageanalysis.EdgeHistogram
     lireFeature.extract(bufferedImage)
-    EdgeHistogramWrapper(lireFeature)
+    new IDocument[net.semanticmetadata.lire.imageanalysis.EdgeHistogram] {
+      override def compareTo(other: IComparable[net.semanticmetadata.lire.imageanalysis.EdgeHistogram]) = false
+    }
   }
 }
 
-case class GaborWrapper(gabor: net.semanticmetadata.lire.imageanalysis.Gabor) extends FeatureContainer[GaborWrapper]
-case class LireGabor(val scaleWidth: Int, val scaleHeight: Int) extends LireFeature with FeatureContainer[LireGabor] {
-  def getFeature(image: LireImage): GaborWrapper = {
-    val bufferedImage = super.getFeature(image, scaleWidth, scaleHeight)
+case class LireGabor(val scaleWidth: Int, val scaleHeight: Int) extends IFeature with IComparable[net.semanticmetadata.lire.imageanalysis.Gabor] {
+  def getFeature(image: LireImage): IComparable[net.semanticmetadata.lire.imageanalysis.Gabor] = {
+    val bufferedImage = FeatureUtils.getFeature(image, scaleWidth, scaleHeight)
     val lireFeature = new net.semanticmetadata.lire.imageanalysis.Gabor
     lireFeature.extract(bufferedImage)
-    GaborWrapper(lireFeature)
+    new IDocument[net.semanticmetadata.lire.imageanalysis.Gabor] {
+      override def compareTo(other: IComparable[net.semanticmetadata.lire.imageanalysis.Gabor]) = false
+    }
   }
 }
 
 import net.semanticmetadata.lire.imageanalysis.sift.Feature
 import net.semanticmetadata.lire.imageanalysis.sift.Extractor
-case class SIFTWrapper(features: List[Feature]) extends FeatureContainer[SIFTWrapper]
-case class LireSIFT() {
-  def getFeature(image: LireImage, scaleWidth: Int = Constants.SCALE_WIDTH, scaleHeight: Int = Constants.SCALE_HEIGHT): SIFTWrapper = {
+case class LireSIFT() extends IFeature with IComparable[List[Feature]] {
+  def getFeature(image: LireImage, scaleWidth: Int = Constants.SCALE_WIDTH, scaleHeight: Int = Constants.SCALE_HEIGHT): IComparable[List[Feature]] = {
     var features: List[Feature] = null
     try {
-      var bufferedImage = image.f_getFeature
+      var bufferedImage = image.f_getFeature.getFeature
       // When this is null, the jpg file cannot be processed
       if (bufferedImage != null) {
         val imageType = if (bufferedImage.getType == 0) BufferedImage.TYPE_INT_ARGB else bufferedImage.getType
@@ -164,24 +160,23 @@ case class LireSIFT() {
     } catch {
       case ex: Exception => { log(ex.getMessage)("error"); throw new RuntimeException("image id = " + image.p.url + ", " + ex.getMessage) }
     }
-    SIFTWrapper(features)
+    new IDocument[List[Feature]] {
+      override def compareTo(other: IComparable[List[Feature]]) = false
+    }
   }
 }
 
 import net.semanticmetadata.lire.utils.LuceneUtils
-import org.apache.lucene.document.Document
-import org.apache.lucene.document.Document
 import org.apache.lucene.index.IndexWriter
-case class LuceneDocumentWrapper(document: Document) extends FeatureContainer[LuceneDocumentWrapper]
-case class LireIndex() {
+case class LireIndex() extends IFeature with IComparable[org.apache.lucene.document.Document] {
   @throws(classOf[IOException])
   @throws(classOf[Exception])
-  def getFeature(location: String, features: List[List[LuceneDocumentWrapper]]): String = {
+  def getFeature(location: String, features: List[List[org.apache.lucene.document.Document]]): String = {
     val indexWriter = LuceneUtils.createIndexWriter(location, true)
     features.foreach(featureList => featureList.foreach(feature => {
-      IndexUtils.addOneDocToExistingIndex(indexWriter, feature.document)
+      IndexUtils.addOneDocToExistingIndex(indexWriter, feature)
     }))
-    indexWriter.close()
+    indexWriter.close
     location
   }
 }

@@ -18,15 +18,15 @@ import edu.uwm.cs.pir.domain.impl.lire._
 import edu.uwm.cs.pir.domain.features.concrete._
 
 //Test implementation of the MIR domain functions
-case class MIRFunction (val scaleWidth : Int, val scaleHeight : Int) extends ImageQueryFunction with ContainerFeature {
+case class MIRFunction (val scaleWidth : Int, val scaleHeight : Int) extends ImageQueryFunction {
 
   type ID = String
 
   type Image = LireImage
   type Text = LireText
 
-  type CEDD = CEDDWrapper
-  type FCTH = FCTHWrapper
+  type CEDD = IDocument[net.semanticmetadata.lire.imageanalysis.CEDD]
+  type FCTH = IDocument[net.semanticmetadata.lire.imageanalysis.FCTH]
   
   type Index[X] = String;  type Index2[X, Y] = String;		
 

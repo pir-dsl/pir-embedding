@@ -4,6 +4,6 @@ trait IText[T] extends IConcreteFeature[T] {
 
 }
 
-class Text(val id : String) extends IText[String] {
-  
+class Text[T] (val text : T) extends IText[T] {
+  override def getFeature : T = text
 }
