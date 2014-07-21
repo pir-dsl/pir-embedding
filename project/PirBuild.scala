@@ -32,12 +32,13 @@ object PirBuild extends Build {
     // Fork new JVMs for tests and set Java options for those
     //fork := true,
     //javaOptions += "-Xmx3g",
-
+    resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+    
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "2.0" % "test",
       "org.scalacheck" %% "scalacheck" % "1.10.0" % "test",
       "com.novocode" % "junit-interface" % "0.9" % "test",
-      "org.easymock" % "easymock" % "3.1" % "test"   
+      "org.easymock" % "easymock" % "3.1" % "test"
     ) 
   )
   
@@ -47,8 +48,11 @@ object PirBuild extends Build {
     libraryDependencies ++= Seq(
       //"colt" % "colt" % "1.2.0",
       "commons-io" % "commons-io" % "2.4",
-      "org.apache.commons" % "commons-math3" % "3.0",
-      "org.apache.lucene" % "lucene-core" % "3.6.1",
+      "org.apache.commons" % "commons-math3" % "3.2",
+      "org.apache.lucene" % "lucene-core" % "4.2.1",
+      "org.apache.lucene" % "lucene-analyzers-common" % "4.2.1",
+      "org.apache.lucene" % "lucene-queryparser" % "4.2.1",
+       "com.sangupta" % "jopensurf" % "1.0.0",
       "com.drewnoakes" % "metadata-extractor" % "2.6.2",
       "log4j" % "log4j" % "1.2.17",
 	  "org.slf4j" % "slf4j-api" % "1.7.2",

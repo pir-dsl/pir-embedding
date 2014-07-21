@@ -2,20 +2,20 @@ package edu.uwm.cs.pir.spark
 
 import com.typesafe.config._
 
-import org.apache.spark._
-import SparkContext._
+//import org.apache.spark._
+//import SparkContext._
 
 import edu.uwm.cs.pir.utils.AWSS3API.AWSS3Config
 import edu.uwm.cs.pir.utils.GeneralUtils._
 
 import com.esotericsoftware.kryo.Kryo
-import org.apache.spark.serializer.KryoRegistrator
+//import org.apache.spark.serializer.KryoRegistrator
 
 object SparkObject { 
   
   val conf = ConfigFactory.load	
 
-  var sparkContext: SparkContext = null
+  //var sparkContext: SparkContext = null
   
   var awsS3Config: AWSS3Config = initAWSS3Config
   
@@ -38,26 +38,26 @@ object SparkObject {
 				if ("true" == isMd5Validation) true else false, bucketName, s3_root, s3_persistence_bucket_name)	  
   }
   
-  def initSparkConf : SparkContext = {
-			
-		//log("conf = " + conf)("INFO")  
-		val hostName = conf.getString("spark_env.host_name")
-		val port = conf.getString("spark_env.port")
-		val numCore = conf.getString("spark_env.num_core")
-		val appName = conf.getString("spark_env.host_name")
-		val sparkHome = conf.getString("spark_env.spark_home")
-		val pirAssembly = conf.getString("pir_env.pir_assembly")
-		setSparkContext(hostName, port, numCore, appName, sparkHome, pirAssembly)  
-  }
+//  def initSparkConf : SparkContext = {
+//			
+//		//log("conf = " + conf)("INFO")  
+//		val hostName = conf.getString("spark_env.host_name")
+//		val port = conf.getString("spark_env.port")
+//		val numCore = conf.getString("spark_env.num_core")
+//		val appName = conf.getString("spark_env.host_name")
+//		val sparkHome = conf.getString("spark_env.spark_home")
+//		val pirAssembly = conf.getString("pir_env.pir_assembly")
+//		setSparkContext(hostName, port, numCore, appName, sparkHome, pirAssembly)  
+//  }
   
-  def setSparkContext(hostname: String, port: String, numCore: String, appName: String, sparkHome: String, pirAssembly: String) : SparkContext = {
-	  
-	  val sparkHostString = if ("local" == hostname) hostname + "[" + numCore + "]" else "spark://" + hostname + ":" + port
-	  //System.clearProperty("spark.master.port")
-		  
-	  //System.setProperty("spark.serializer", "org.apache.spark.serializer.KryoSerializer")		  
-	  System.setProperty("spark.scheduler.mode", "FAIR")
-	  System.setProperty("spark.task.maxFailures", "1")
-	  new SparkContext(sparkHostString, appName, "/" + sparkHome, Seq(pirAssembly), Map(), Map())  
-  }
+//  def setSparkContext(hostname: String, port: String, numCore: String, appName: String, sparkHome: String, pirAssembly: String) : SparkContext = {
+//	  
+//	  val sparkHostString = if ("local" == hostname) hostname + "[" + numCore + "]" else "spark://" + hostname + ":" + port
+//	  //System.clearProperty("spark.master.port")
+//		  
+//	  //System.setProperty("spark.serializer", "org.apache.spark.serializer.KryoSerializer")		  
+//	  System.setProperty("spark.scheduler.mode", "FAIR")
+//	  System.setProperty("spark.task.maxFailures", "1")
+//	  new SparkContext(sparkHostString, appName, "/" + sparkHome, Seq(pirAssembly), Map(), Map())  
+//  }
 }

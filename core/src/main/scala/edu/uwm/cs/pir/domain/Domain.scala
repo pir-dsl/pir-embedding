@@ -29,20 +29,43 @@ import edu.uwm.cs.pir.Base
     def f_text: LoadOp[Path, Text] // Path => List[Feature[Text]]
   }
 
+  trait Indexer[X] {
+    def apply (in : List[IndexData[X]]) 
+  }
+  
+  trait IndexData[X] {
+    
+  }
+  
+  trait FeatureToIndexData[X] {
+	 def f_feature2Index : X => IndexData[X]
+  }
+  
+  trait IndexDataToFeature[X] {
+    def f_index2Feature: IndexData[X] => X
+  }
+  
+  trait Search[X] {
+    def search(q : IndexData[X]) : List[IndexData[X]] 
+  }
+  
   // global features
 
   trait CEDD extends Domain {
     type CEDD <: Feature[CEDD]
     def f_cedd: PrjOp[Image, CEDD] // Image => CEDD
   }
+  
   trait FCTH extends Domain {
     type FCTH <: Feature[FCTH]
     def f_fcth: PrjOp[Image, FCTH] // Image => FCTH
   }
+  
   trait Gabor extends Domain {
     type Gabor <: Feature[Gabor];
     def f_gabor: PrjOp[Image, Gabor] // Image => Gabor
   }
+  
   trait ColorLayout extends Domain {
     type ColorLayout <: Feature[ColorLayout]
     def f_colorlayout: PrjOp[Image, ColorLayout] // Image => ColorLayout
