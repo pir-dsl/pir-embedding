@@ -29,13 +29,11 @@ import edu.uwm.cs.pir.Base
     def f_text: LoadOp[Path, Text] // Path => List[Feature[Text]]
   }
 
-  trait Indexer[X] {
-    def apply (in : List[IndexData[X]]) 
-  }
+  trait Data[X] {}
   
-  trait IndexData[X] {
-    
-  }
+  trait ComparableData[X] extends Data[X] with Comparable[X] {}
+  
+  trait IndexData[X] extends Data[X] {}
   
   trait FeatureToIndexData[X] {
 	 def f_feature2Index : X => IndexData[X]
