@@ -9,7 +9,8 @@ trait Training extends Clustering with LatentTopic with CCA
 trait ComparableFeature { type Feature[X] = ComparableData[X] }
 trait StringPath { type Path = String }
 
-trait ImageQueryFunction extends Loading with CEDD with FCTH with Indexing
+trait FeatureLoadFunction extends Loading with CEDD with FCTH
+trait ImageQueryFunction extends FeatureLoadFunction with Indexing
 trait SFAFunction extends Loading with CEDD with Gabor with ColorLayout with Similarity
 
 class IntWrapper (val x : Int) extends ComparableData[IntWrapper] {
@@ -44,41 +45,41 @@ trait ComparableComposition extends Composition with ComparableFeature {
   def f_compose[X <: Feature[X], Y <: Feature[Y]] = (x: X, y: Y) => ComposeImpl(x, y)
 }
 
-trait Indexable { type Feature[X] = Data[X] }
+trait FeatureData { type Feature[X] = RawData[X] }
+trait Indexable { type Feature[X] = IndexData[X] }
 
 import edu.uwm.cs.pir.utils.AWSS3API.AWSS3Config
 case class Location(val url: String, val awsS3Config: AWSS3Config)
 
 import java.awt.image.BufferedImage
 import edu.uwm.cs.pir.utils.ImageUtils
-class LireImage(val p: Location) extends Data[LireImage] {
+class LireImage(val p: Location) extends RawData[LireImage] {
   def f_getFeature: BufferedImage = {
     ImageUtils.readInputAsImage(p.url)
   }
 }
 
 import edu.uwm.cs.pir.utils.FileUtils
-class LireText(val p: Location) extends Data[LireText] {
+class LireText(val p: Location) extends RawData[LireText] {
   def f_getFeature: String = {
     FileUtils.readTextFile(p.url)
   }
 }
 
-class LireCEDDWrapper (x : net.semanticmetadata.lire.imageanalysis.CEDD) extends IndexData[LireCEDDWrapper] {
+class LireCEDDWrapper (x : net.semanticmetadata.lire.imageanalysis.CEDD) extends RawData[LireCEDDWrapper] {
 }
 
-class LireFCTHWrapper (x : net.semanticmetadata.lire.imageanalysis.FCTH) extends IndexData[LireFCTHWrapper] {
+class LireFCTHWrapper (x : net.semanticmetadata.lire.imageanalysis.FCTH) extends RawData[LireFCTHWrapper] {
 }
 
-trait LireFunction extends ImageQueryFunction with Indexable {
+trait LireFeatureConvertFunction extends FeatureLoadFunction with FeatureData {
   type ID = String
   type Image = LireImage; type Text = LireText
   type CEDD = LireCEDDWrapper; type FCTH = LireFCTHWrapper
 
-  type Index[X] = String; // type Index2[X, Y] = String;		
-
   def f_image = (p: Path) => new LireImage(new Location("", null))
   def f_text = (p: Path) => new LireText(new Location("", null))
+
   def f_cedd = (i: Image) => {
     val cedd = new net.semanticmetadata.lire.imageanalysis.CEDD
     cedd.extract(i.f_getFeature)
@@ -89,6 +90,15 @@ trait LireFunction extends ImageQueryFunction with Indexable {
     fcth.extract(i.f_getFeature)
     new LireFCTHWrapper(fcth)
   }
+}
+
+class LireFeatureToIndexData extends FeatureToIndexData[RawData[LireCEDDWrapper]] {
+    override def f_feature2Index : RawData[LireCEDDWrapper] => IndexData[RawData[LireCEDDWrapper]] = null
+}
+
+trait LireIndexFunction extends Indexing with Indexable {
+  type ID = String
+  type Index[X] = String;		
 
   def f_index[X] = (s: List[(ID, X)]) => "Index"
   def f_query[X] = (k: X, i: Index[X]) => List()
