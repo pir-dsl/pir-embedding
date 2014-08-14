@@ -28,7 +28,7 @@ trait ComparableSimilarity extends Similarity with ComparableFeature {
     override def compareTo(t: Int) = x.compareTo(t)
   }
   
-  override def f_distance[X <: ComparableData[X]] = (x: X) => (y: X) => { val c = x.compareTo(y); new IntWrapper (if (c < 0) -c else c) }
+  override def f_distance[X <: Comparable[X]] = (x: X) => (y: X) => { val c = x.compareTo(y); new IntWrapper (if (c < 0) -c else c) }
   override def f_order[X <: Comparable[X]] = (x: (ID, X), y: (ID, X)) => x._2.compareTo(y._2) < 0
 }
 
@@ -36,40 +36,40 @@ trait ComparableSimilarity extends Similarity with ComparableFeature {
 
 trait ComparableComposition extends Composition with ComparableFeature {
 
-  case class ComposeImpl[X <: ComparableData[X], Y <: ComparableData[Y]](l: X, r: Y) extends ComparableData[ComposeImpl[X, Y]] {
+  case class ComposeImpl[X <: Comparable[X], Y <: Comparable[Y]](l: X, r: Y) extends Comparable[ComposeImpl[X, Y]] {
     def compareTo(that: ComposeImpl[X, Y]) = l.compareTo(that.l) + r.compareTo(that.r)
   }
 
-  type Compose[X <: Feature[X], Y <: Feature[Y]] = ComposeImpl[X, Y]
+  type Compose[X, Y] = ComposeImpl[X, Y]
 
-  def f_compose[X <: Feature[X], Y <: Feature[Y]] = (x: X, y: Y) => ComposeImpl(x, y)
+  def f_compose[X <: Comparable[X], Y <: Comparable[Y]] = (x: X, y: Y) => ComposeImpl(x, y)
 }
 
-trait FeatureData { type Feature[X] = RawData[X] }
-trait Indexable { type Feature[X] = IndexData[X] }
+trait FeatureData { type Feature[X] = Data[X] }
+trait Indexable { type Feature[X] = Data[X] }
 
 import edu.uwm.cs.pir.utils.AWSS3API.AWSS3Config
 case class Location(val url: String, val awsS3Config: AWSS3Config)
 
 import java.awt.image.BufferedImage
 import edu.uwm.cs.pir.utils.ImageUtils
-class LireImage(val p: Location) extends RawData[LireImage] {
+class LireImage(val p: Location) extends Data[LireImage] {
   def f_getFeature: BufferedImage = {
     ImageUtils.readInputAsImage(p.url)
   }
 }
 
 import edu.uwm.cs.pir.utils.FileUtils
-class LireText(val p: Location) extends RawData[LireText] {
+class LireText(val p: Location) extends Data[LireText] {
   def f_getFeature: String = {
     FileUtils.readTextFile(p.url)
   }
 }
 
-class LireCEDDWrapper (x : net.semanticmetadata.lire.imageanalysis.CEDD) extends RawData[LireCEDDWrapper] {
+class LireCEDDWrapper (x : net.semanticmetadata.lire.imageanalysis.CEDD) extends Data[LireCEDDWrapper] {
 }
 
-class LireFCTHWrapper (x : net.semanticmetadata.lire.imageanalysis.FCTH) extends RawData[LireFCTHWrapper] {
+class LireFCTHWrapper (x : net.semanticmetadata.lire.imageanalysis.FCTH) extends Data[LireFCTHWrapper] {
 }
 
 trait LireFeatureConvertFunction extends FeatureLoadFunction with FeatureData {
@@ -92,12 +92,12 @@ trait LireFeatureConvertFunction extends FeatureLoadFunction with FeatureData {
   }
 }
 
-class LireFeatureToIndexData extends FeatureToIndexData[RawData[LireCEDDWrapper]] {
-    override def f_feature2Index : RawData[LireCEDDWrapper] => IndexData[RawData[LireCEDDWrapper]] = null
+class LireCEDDFeatureToIndexData extends FeatureToIndexData[Data[LireCEDDWrapper]] {
+    override def f_feature2Index : Data[LireCEDDWrapper] => IndexData[Data[LireCEDDWrapper]] = null
 }
 
 trait LireIndexFunction extends Indexing with Indexable {
-  type ID = String
+  //type ID = Int
   type Index[X] = String;		
 
   def f_index[X] = (s: List[(ID, X)]) => "Index"
@@ -130,8 +130,8 @@ trait NumberFunction extends Loading with GlobalFeature with LocalFeature with I
   type CEDD = IntWrapper; type FCTH = IntWrapper
   type ColorLayout = IntWrapper; type Gabor = IntWrapper
   type SIFT = IntWrapper
-  type Cluster[X] = IntWrapper; type Histogram[X <: Feature[X]] = X
-  type Topic[X] = IntWrapper; type Distribution[X <: Feature[X]] = X
+  type Cluster[X] = IntWrapper; type Histogram[X] = X
+  type Topic[X] = IntWrapper; type Distribution[X] = X
   type CCA[X, Y] = List[FeatureDoc[(X, Y)]]
 
   type Index[X] = List[FeatureDoc[X]]; // type Index2[X, Y] = List[(ID, (X, Y))]; 
@@ -147,21 +147,21 @@ trait NumberFunction extends Loading with GlobalFeature with LocalFeature with I
   def f_colorlayout = (i: Image) => new IntWrapper (i.x * 1)
   def f_gabor = (i: Image) => new IntWrapper (i.x * 3)
 
-  def f_cluster_train[X <: Feature[X]] = (s: List[(ID, X)]) => new IntWrapper (1)
-  def f_cluster_proj[X <: Feature[X]] = (x: X, c: Cluster[X]) => x
+  def f_cluster_train[X] = (s: List[(ID, X)]) => new IntWrapper (1)
+  def f_cluster_proj[X] = (x: X, c: Cluster[X]) => x
 
-  def f_lda_train[X <: Feature[X]] = (s: List[(ID, X)]) => new IntWrapper (1)
-  def f_lda_proj[X <: Feature[X]] = (x: X, t: Topic[X]) => x
+  def f_lda_train[X] = (s: List[(ID, X)]) => new IntWrapper (1)
+  def f_lda_proj[X] = (x: X, t: Topic[X]) => x
 
-  def f_cca_train[X <: Feature[X], Y <: Feature[Y]] = (l: List[(ID, (X, Y))]) => l
-  def f_cca_proj1[X <: Feature[X], Y <: Feature[Y]] = (x: X, cca: CCA[X, Y]) => cca.filter((t) => x.compareTo(t._2._1) == 0).map(t => t._1)
-  def f_cca_proj2[X <: Feature[X], Y <: Feature[Y]] = (y: Y, cca: CCA[X, Y]) => cca.filter((t) => y.compareTo(t._2._2) == 0).map(t => t._1)
+  def f_cca_train[X, Y] = (l: List[(ID, (X, Y))]) => l
+  def f_cca_proj1[X <: Comparable[X], Y <: Comparable[Y]] = (x: X, cca: CCA[X, Y]) => cca.filter((t) => x.compareTo(t._2._1) == 0).map(t => t._1)
+  def f_cca_proj2[X <: Comparable[X], Y <: Comparable[Y]] = (y: Y, cca: CCA[X, Y]) => cca.filter((t) => y.compareTo(t._2._2) == 0).map(t => t._1)
 
-  def f_index[X <: Feature[X]] = (s: List[(ID, X)]) => s
-  def f_query[X <: Feature[X]] = (k: X, i: Index[X]) => i.filter(p => p._2.compareTo(k) == 0).map(p => p._1)
+  def f_index[X] = (s: List[(ID, X)]) => s
+  def f_query[X <: Comparable[X]] = (k: X, i: Index[X]) => i.filter(p => p._2.compareTo(k) == 0).map(p => p._1)
 
-  //  def f_index2[X <: Feature[X], Y <: Feature[Y]] = (s: List[(ID, (X, Y))]) => s
-  //  def f_query2[X <: Feature[X], Y <: Feature[Y]] = (k: (X, Y), i: Index2[X, Y]) =>
+  //  def f_index2[X, Y] = (s: List[(ID, (X, Y))]) => s
+  //  def f_query2[X, Y] = (k: (X, Y), i: Index2[X, Y]) =>
   //    i.filter(p => p._2._1.compareTo(k._1) == 0 && p._2._2.compareTo(k._2) == 0)
   //    .map(p => p._1)
 }
