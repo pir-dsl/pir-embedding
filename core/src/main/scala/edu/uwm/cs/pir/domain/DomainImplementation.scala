@@ -6,7 +6,6 @@ trait GlobalFeature extends CEDD with Gabor with ColorLayout with FCTH
 trait LocalFeature extends SIFT
 trait Training extends Clustering with LatentTopic with CCA
 
-trait ComparableFeature { type Feature[X] = ComparableData[X] }
 trait StringPath { type Path = String }
 
 trait FeatureLoadFunction extends Loading with CEDD with FCTH
@@ -21,32 +20,48 @@ class StringWrapper (val x : String)  extends ComparableData[StringWrapper] {
   override def compareTo (t : StringWrapper) = x.compare(t.x)
 }
 
-trait ComparableSimilarity extends Similarity with ComparableFeature {
-  type Distance[X] = IntWrapper
+//trait ComparableSimilarity extends Similarity {
+//  type Distance[X] = IntWrapper
+//
+//  class IntegerComparableData (x : Int) extends ComparableData[Int] {
+//    override def compareTo(t: Int) = x.compareTo(t)
+//  }
+//  
+//  override def f_distance[X <: Comparable[X]] = (x: X) => (y: X) => { val c = x.compareTo(y); new IntWrapper (if (c < 0) -c else c) }
+//  override def f_order[X <: Comparable[X]] = (x: (ID, X), y: (ID, X)) => x._2.compareTo(y._2) < 0
+//}
+//
+//// Test implementation of feature composition 
+//
+//trait ComparableComposition extends Composition {
+//
+//  case class ComposeImpl[X, Y](l: X, r: Y) extends Comparable[ComposeImpl[X, Y]] {
+//    def compareTo(that: ComposeImpl[X, Y]) = l.compareTo(that.l) + r.compareTo(that.r)
+//  }
+//
+//  type Compose[X, Y] = ComposeImpl[X, Y]
+//
+//  def f_compose[X, Y] = (x: X, y: Y) => ComposeImpl(x, y)
+//}
 
-  class IntegerComparableData (x : Int) extends ComparableData[Int] {
-    override def compareTo(t: Int) = x.compareTo(t)
-  }
-  
+trait SimpleSimilarity extends Similarity {
+  type Distance[X] = IntWrapper
   override def f_distance[X <: Comparable[X]] = (x: X) => (y: X) => { val c = x.compareTo(y); new IntWrapper (if (c < 0) -c else c) }
   override def f_order[X <: Comparable[X]] = (x: (ID, X), y: (ID, X)) => x._2.compareTo(y._2) < 0
 }
 
-// Test implementation of feature composition 
-
-trait ComparableComposition extends Composition with ComparableFeature {
-
-  case class ComposeImpl[X <: Comparable[X], Y <: Comparable[Y]](l: X, r: Y) extends Comparable[ComposeImpl[X, Y]] {
-    def compareTo(that: ComposeImpl[X, Y]) = l.compareTo(that.l) + r.compareTo(that.r)
+trait SimpleComposition extends Composition {
+  
+  case class SimpleComposeImpl[X, Y](l: X, r: Y) {
+	  (l, r)
   }
+    
+  type Compose[X, Y] = SimpleComposeImpl[X, Y]
 
-  type Compose[X, Y] = ComposeImpl[X, Y]
-
-  def f_compose[X <: Comparable[X], Y <: Comparable[Y]] = (x: X, y: Y) => ComposeImpl(x, y)
+  def f_compose[X, Y] = (x: X, y: Y) => SimpleComposeImpl(x, y)
 }
 
 trait FeatureData { type Feature[X] = Data[X] }
-trait Indexable { type Feature[X] = Data[X] }
 
 import edu.uwm.cs.pir.utils.AWSS3API.AWSS3Config
 case class Location(val url: String, val awsS3Config: AWSS3Config)
@@ -73,7 +88,7 @@ class LireFCTHWrapper (x : net.semanticmetadata.lire.imageanalysis.FCTH) extends
 }
 
 trait LireFeatureConvertFunction extends FeatureLoadFunction with FeatureData {
-  type ID = String
+  //type ID = Int
   type Image = LireImage; type Text = LireText
   type CEDD = LireCEDDWrapper; type FCTH = LireFCTHWrapper
 
@@ -96,7 +111,7 @@ class LireCEDDFeatureToIndexData extends FeatureToIndexData[Data[LireCEDDWrapper
     override def f_feature2Index : Data[LireCEDDWrapper] => IndexData[Data[LireCEDDWrapper]] = null
 }
 
-trait LireIndexFunction extends Indexing with Indexable {
+trait LireIndexFunction extends Indexing {
   //type ID = Int
   type Index[X] = String;		
 
@@ -105,7 +120,7 @@ trait LireIndexFunction extends Indexing with Indexable {
 }
 
 // Test implementation of the MIR domain functions
-trait StringFunction extends ImageQueryFunction with ComparableComposition {
+trait StringFunction extends ImageQueryFunction {
   type ID = Int
   type Image = StringWrapper; type Text = StringWrapper
   type CEDD = StringWrapper; type FCTH = StringWrapper; type SIFT = StringWrapper
@@ -124,7 +139,7 @@ trait StringFunction extends ImageQueryFunction with ComparableComposition {
 }
 
 // Test implementation of the MIR domain functions
-trait NumberFunction extends Loading with GlobalFeature with LocalFeature with Indexing with Training with ComparableFeature with StringPath {
+trait NumberFunction extends Loading with GlobalFeature with LocalFeature with Indexing with Training with StringPath {
 
   type Image = IntWrapper; type Text = IntWrapper
   type CEDD = IntWrapper; type FCTH = IntWrapper
@@ -154,11 +169,11 @@ trait NumberFunction extends Loading with GlobalFeature with LocalFeature with I
   def f_lda_proj[X] = (x: X, t: Topic[X]) => x
 
   def f_cca_train[X, Y] = (l: List[(ID, (X, Y))]) => l
-  def f_cca_proj1[X <: Comparable[X], Y <: Comparable[Y]] = (x: X, cca: CCA[X, Y]) => cca.filter((t) => x.compareTo(t._2._1) == 0).map(t => t._1)
-  def f_cca_proj2[X <: Comparable[X], Y <: Comparable[Y]] = (y: Y, cca: CCA[X, Y]) => cca.filter((t) => y.compareTo(t._2._2) == 0).map(t => t._1)
+  def f_cca_proj1[X, Y] = (x: X, cca: CCA[X, Y]) => cca.filter(t => t._2 == x).map(t => t._1)
+  def f_cca_proj2[X, Y] = (y: Y, cca: CCA[X, Y]) => cca.filter(t => t._2 == y).map(t => t._1)
 
   def f_index[X] = (s: List[(ID, X)]) => s
-  def f_query[X <: Comparable[X]] = (k: X, i: Index[X]) => i.filter(p => p._2.compareTo(k) == 0).map(p => p._1)
+  def f_query[X] = (k: X, i: Index[X]) => i.filter(p => (p._2 == k)).map(p => p._1)
 
   //  def f_index2[X, Y] = (s: List[(ID, (X, Y))]) => s
   //  def f_query2[X, Y] = (k: (X, Y), i: Index2[X, Y]) =>

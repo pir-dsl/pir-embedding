@@ -3,7 +3,7 @@ package edu.uwm.cs.pir.examples
 import edu.uwm.cs.pir.pipeline._
 import edu.uwm.cs.pir.domain._
 
-object TestSequential extends Sequential with NumberFunction with ComparableComposition with Example2 {
+object TestSequential extends Sequential with NumberFunction with SimpleComposition with Example2 {
   def main(args: Array[String]): Unit = {
     imageQuery(SequentialVisitor)
   }

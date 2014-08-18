@@ -3,7 +3,7 @@ package edu.uwm.cs.pir.examples
 import edu.uwm.cs.pir.pipeline._
 import edu.uwm.cs.pir.domain._
 
-object TestSequentialTransformer extends Sequential with ComparableComposition with ExampleNew {
+object TestSequentialTransformer extends Sequential with SimpleComposition with ExampleNew {
   def main(args: Array[String]): Unit = {
     imageQuery(SequentialVisitor)
   }

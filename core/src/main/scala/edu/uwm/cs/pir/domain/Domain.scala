@@ -13,13 +13,14 @@ import edu.uwm.cs.pir.Base
 
   trait Similarity extends Domain {
     type Distance[X] // point feature types
+    //def f_distance[X <: Comparable[X]]: X => PrjOp[X, Distance[X]] // (X, X) => Distance[X]
     def f_distance[X <: Comparable[X]]: X => PrjOp[X, Distance[X]] // (X, X) => Distance[X]
     def f_order[X <: Comparable[X]]: OdrOp[X] // (X, X) => Boolean
   }
 
   trait Composition extends Domain {
     type Compose[X, Y]
-    def f_compose[X <: Comparable[X], Y <: Comparable[Y]]: CpsOp[X, Y, Compose[X, Y]] // (X, Y) => Compose[X, Y]
+    def f_compose[X, Y]: CpsOp[X, Y, Compose[X, Y]] // (X, Y) => Compose[X, Y]
   }
 
   trait Loading extends Domain {
