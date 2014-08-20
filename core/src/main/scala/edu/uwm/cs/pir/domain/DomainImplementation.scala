@@ -2,18 +2,31 @@ package edu.uwm.cs.pir.domain
 
 import edu.uwm.cs.pir.domain._
 
-trait GlobalFeature extends CEDD with Gabor with ColorLayout with FCTH
-trait LocalFeature extends SIFT
+trait GlobalFeature extends AutoColorCorrelogram with BasicFeatures with BinaryPatternsPyramid with CEDD
+			with ColorLayout with EdgeHistogram with FCTH with FuzzyColorHistogram with FuzzyOpponentHistogram 
+			with Gabor with JCD with JpegCoefficientHistogram with LocalBinaryPatterns with LuminanceLayout 
+			with OpponentHistogram with PHOG with RotationInvariantLocalBinaryPatterns with ScalableColor with SimpleColorHistogram with Tamura
+trait LocalFeature extends SIFT with SurfFeature with MSER
+
 trait Training extends Clustering with LatentTopic with CCA
 
 trait StringPath { type Path = String }
 
 trait FeatureLoadFunction extends Loading with CEDD with FCTH
 trait ImageQueryFunction extends FeatureLoadFunction with Indexing
-trait SFAFunction extends Loading with CEDD with Gabor with ColorLayout with Similarity
+
+import net.semanticmetadata.lire.imageanalysis.LireFeature
+
+trait SFAFunction extends Loading with CEDD with Gabor with ColorLayout with SimpleSimilarity[IntWrapper] {
+   override def getDistance[X](x : X, y : X): Float = x.asInstanceOf[IntWrapper].x-y.asInstanceOf[IntWrapper].x
+}
 
 class IntWrapper (val x : Int) extends ComparableData[IntWrapper] {
   override def compareTo (t : IntWrapper) = x.compare(t.x)
+}
+
+class FloatWrapper (val x : Float) extends ComparableData[FloatWrapper] {
+  override def compareTo (t : FloatWrapper) = x.compare(t.x)
 }
 
 class StringWrapper (val x : String)  extends ComparableData[StringWrapper] {
@@ -44,10 +57,11 @@ class StringWrapper (val x : String)  extends ComparableData[StringWrapper] {
 //  def f_compose[X, Y] = (x: X, y: Y) => ComposeImpl(x, y)
 //}
 
-trait SimpleSimilarity extends Similarity {
-  type Distance[X] = IntWrapper
-  override def f_distance[X <: Comparable[X]] = (x: X) => (y: X) => { val c = x.compareTo(y); new IntWrapper (if (c < 0) -c else c) }
-  override def f_order[X <: Comparable[X]] = (x: (ID, X), y: (ID, X)) => x._2.compareTo(y._2) < 0
+trait SimpleSimilarity[X] extends Similarity { 
+  def getDistance[X](x : X, y : X) : Float
+  type Distance[X] = FloatWrapper
+  override def f_distance[X] = (x: X) => (y: X) => new FloatWrapper(getDistance[X](x, y))
+  override def f_order[X] = (x: (ID, X), y: (ID, X)) => false
 }
 
 trait SimpleComposition extends Composition {
@@ -60,8 +74,6 @@ trait SimpleComposition extends Composition {
 
   def f_compose[X, Y] = (x: X, y: Y) => SimpleComposeImpl(x, y)
 }
-
-trait FeatureData { type Feature[X] = Data[X] }
 
 import edu.uwm.cs.pir.utils.AWSS3API.AWSS3Config
 case class Location(val url: String, val awsS3Config: AWSS3Config)
@@ -87,19 +99,21 @@ class LireCEDDWrapper (x : net.semanticmetadata.lire.imageanalysis.CEDD) extends
 class LireFCTHWrapper (x : net.semanticmetadata.lire.imageanalysis.FCTH) extends Data[LireFCTHWrapper] {
 }
 
-trait LireFeatureConvertFunction extends FeatureLoadFunction with FeatureData {
-  //type ID = Int
+import edu.uwm.cs.pir.spark.SparkObject._
+trait LireFeatureConvertFunction extends FeatureLoadFunction {
   type Image = LireImage; type Text = LireText
   type CEDD = LireCEDDWrapper; type FCTH = LireFCTHWrapper
 
-  def f_image = (p: Path) => new LireImage(new Location("", null))
-  def f_text = (p: Path) => new LireText(new Location("", null))
+  awsS3Config = initAWSS3Config
+  def f_image = (p: Path) => new LireImage(new Location("some image file location", awsS3Config))
+  def f_text = (p: Path) => new LireText(new Location("some text file location", awsS3Config))
 
   def f_cedd = (i: Image) => {
     val cedd = new net.semanticmetadata.lire.imageanalysis.CEDD
     cedd.extract(i.f_getFeature)
     new LireCEDDWrapper(cedd)
   }
+  
   def f_fcth = (i: Image) => {
     val fcth = new net.semanticmetadata.lire.imageanalysis.FCTH
     fcth.extract(i.f_getFeature)
@@ -112,7 +126,6 @@ class LireCEDDFeatureToIndexData extends FeatureToIndexData[Data[LireCEDDWrapper
 }
 
 trait LireIndexFunction extends Indexing {
-  //type ID = Int
   type Index[X] = String;		
 
   def f_index[X] = (s: List[(ID, X)]) => "Index"
@@ -139,7 +152,7 @@ trait StringFunction extends ImageQueryFunction {
 }
 
 // Test implementation of the MIR domain functions
-trait NumberFunction extends Loading with GlobalFeature with LocalFeature with Indexing with Training with StringPath {
+trait NumberFunction extends Loading with CEDD with FCTH with SIFT with Indexing with Training with StringPath {
 
   type Image = IntWrapper; type Text = IntWrapper
   type CEDD = IntWrapper; type FCTH = IntWrapper

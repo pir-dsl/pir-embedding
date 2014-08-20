@@ -14,8 +14,8 @@ import edu.uwm.cs.pir.Base
   trait Similarity extends Domain {
     type Distance[X] // point feature types
     //def f_distance[X <: Comparable[X]]: X => PrjOp[X, Distance[X]] // (X, X) => Distance[X]
-    def f_distance[X <: Comparable[X]]: X => PrjOp[X, Distance[X]] // (X, X) => Distance[X]
-    def f_order[X <: Comparable[X]]: OdrOp[X] // (X, X) => Boolean
+    def f_distance[X]: X => PrjOp[X, Distance[X]] // (X, X) => Distance[X]
+    def f_order[X]: OdrOp[X] // (X, X) => Boolean
   }
 
   trait Composition extends Domain {

@@ -9,7 +9,7 @@ object TestTransmedia extends Sequential with NumberFunction with Example4 {
   }
 }
 
-trait Example4 extends Pipeline with Loading with GlobalFeature with LocalFeature with Training with StringPath {
+trait Example4 extends Pipeline with Loading with CEDD with FCTH with SIFT with Training with StringPath {
    def query(v: PipelineVisitor) {
      val img = f_image(List("image_4", "image_2", "image_5", "image_3", "image_6"))
      val txt = f_text(List("text_4", "text_2", "text_5", "text_3", "text_6"))
