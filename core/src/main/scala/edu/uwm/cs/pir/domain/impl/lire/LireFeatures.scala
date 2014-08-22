@@ -185,3 +185,8 @@
 //}
 //
 //  
+
+import edu.uwm.cs.pir.domain._
+trait LireFunction extends Loading with GlobalFeature with LocalFeature with Indexing with Training with StringPath {
+  
+}
