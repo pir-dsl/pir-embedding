@@ -2,6 +2,7 @@ package edu.uwm.cs.pir.examples
 
 import edu.uwm.cs.pir.pipeline._
 import edu.uwm.cs.pir.domain._
+import edu.uwm.cs.pir.domain.impl.lire.LireIndexFunction
 
 object TestSequentialTransformer extends Sequential with SimpleComposition with ExampleNew {
   def main(args: Array[String]): Unit = {

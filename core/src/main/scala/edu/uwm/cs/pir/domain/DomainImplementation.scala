@@ -2,11 +2,11 @@ package edu.uwm.cs.pir.domain
 
 import edu.uwm.cs.pir.domain._
 
-trait GlobalFeature extends AutoColorCorrelogram with BasicFeatures with BinaryPatternsPyramid with CEDD
-			with ColorLayout with EdgeHistogram with FCTH with FuzzyColorHistogram with FuzzyOpponentHistogram 
+trait GlobalFeatures extends /*AutoColorCorrelogram with BasicFeatures with BinaryPatternsPyramid with*/ CEDD
+			/*with ColorLayout with EdgeHistogram */with FCTH /*with FuzzyColorHistogram with FuzzyOpponentHistogram 
 			with Gabor with JCD with JpegCoefficientHistogram with LocalBinaryPatterns with LuminanceLayout 
-			with OpponentHistogram with PHOG with RotationInvariantLocalBinaryPatterns with ScalableColor with SimpleColorHistogram with Tamura
-trait LocalFeature extends SIFT with SurfFeature with MSER
+			with OpponentHistogram with PHOG with RotationInvariantLocalBinaryPatterns with ScalableColor with SimpleColorHistogram with Tamura*/
+trait LocalFeatures //extends SIFT with SurfFeature with MSER
 
 trait Training extends Clustering with LatentTopic with CCA
 
@@ -123,13 +123,6 @@ trait LireFeatureConvertFunction extends FeatureLoadFunction {
 
 class LireCEDDFeatureToIndexData extends FeatureToIndexData[Data[LireCEDDWrapper]] {
     override def f_feature2Index : Data[LireCEDDWrapper] => IndexData[Data[LireCEDDWrapper]] = null
-}
-
-trait LireIndexFunction extends Indexing {
-  type Index[X] = String;		
-
-  def f_index[X] = (s: List[(ID, X)]) => "Index"
-  def f_query[X] = (k: X, i: Index[X]) => List()
 }
 
 // Test implementation of the MIR domain functions
