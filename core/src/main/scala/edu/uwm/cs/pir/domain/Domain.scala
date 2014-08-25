@@ -59,7 +59,7 @@ import edu.uwm.cs.pir.Base
   //A Color Layout Descriptor (CLD) is designed to capture the spatial distribution of color in an image
   trait ColorLayout extends Domain {
     type ColorLayout// <: Feature[ColorLayout]
-    def f_colorlayout: PrjOp[Image, ColorLayout] // Image => ColorLayout
+    def f_colorLayout: PrjOp[Image, ColorLayout] // Image => ColorLayout
   }
   
   //Edge Histogram Descriptor
@@ -172,6 +172,12 @@ import edu.uwm.cs.pir.Base
     def f_mser: PrjOp[Image, MSER] // Image => MSER
   } 
 
+  trait Lucene extends Base {
+    type Feature
+    type Document
+    def f_luceneDocTransformer : PrjOp[Feature, Document]
+  }
+  
   // indexing
   trait Indexing extends Domain {
     type Index[X];

@@ -17,7 +17,7 @@ trait Example3 extends Pipeline with SFAFunction with StringPath {
 //    val cedd = f_cedd(qImg)
 
     val img = f_image(List("image_4", "image_2", "image_5", "image_3", "image_6"))
-    val x = img connect f_colorlayout connect f_distance(f_colorlayout(qImg)) sort f_order top 4
+    val x = img connect f_colorLayout connect f_distance(f_colorLayout(qImg)) sort f_order top 4
 
     def f_filter(l: List[(ID, _)]) = { val idl = l.map(e => e._1); (x: (ID, _)) => idl.contains(x._1) }
 

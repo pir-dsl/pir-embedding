@@ -2,10 +2,10 @@ package edu.uwm.cs.pir.domain
 
 import edu.uwm.cs.pir.domain._
 
-trait GlobalFeatures extends /*AutoColorCorrelogram with BasicFeatures with BinaryPatternsPyramid with*/ CEDD
-			/*with ColorLayout with EdgeHistogram */with FCTH /*with FuzzyColorHistogram with FuzzyOpponentHistogram 
+trait GlobalFeatures extends AutoColorCorrelogram with BasicFeatures with BinaryPatternsPyramid with CEDD
+			with ColorLayout with EdgeHistogram with FCTH with FuzzyColorHistogram with FuzzyOpponentHistogram 
 			with Gabor with JCD with JpegCoefficientHistogram with LocalBinaryPatterns with LuminanceLayout 
-			with OpponentHistogram with PHOG with RotationInvariantLocalBinaryPatterns with ScalableColor with SimpleColorHistogram with Tamura*/
+			with OpponentHistogram with PHOG with RotationInvariantLocalBinaryPatterns with ScalableColor with SimpleColorHistogram with Tamura
 trait LocalFeatures //extends SIFT with SurfFeature with MSER
 
 trait Training extends Clustering with LatentTopic with CCA
@@ -165,7 +165,7 @@ trait NumberFunction extends Loading with CEDD with FCTH with SIFT with Indexing
 
   def f_sift = (i: Image) => new IntWrapper (i.x * 4)
 
-  def f_colorlayout = (i: Image) => new IntWrapper (i.x * 1)
+  def f_colorLayout = (i: Image) => new IntWrapper (i.x * 1)
   def f_gabor = (i: Image) => new IntWrapper (i.x * 3)
 
   def f_cluster_train[X] = (s: List[(ID, X)]) => new IntWrapper (1)

@@ -4,7 +4,7 @@ import edu.uwm.cs.pir.pipeline._
 import edu.uwm.cs.pir.domain._
 import edu.uwm.cs.pir.domain.impl.lire.LireIndexFunction
 
-object TestSequentialTransformer extends Sequential with SimpleComposition with ExampleNew {
+object TestSequentialTransformer extends ExecutionConfig with Sequential with SimpleComposition with ExampleNew {
   def main(args: Array[String]): Unit = {
     imageQuery(SequentialVisitor)
   }

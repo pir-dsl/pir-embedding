@@ -19,8 +19,11 @@ import org.apache.lucene.document.Document
 
 import cc.mallet.topics.ParallelTopicModel
 
+import edu.uwm.cs.mir.prototypes.feature.utils.FeatureUtils
+
 import edu.uwm.cs.pir.utils.GeneralUtils._
-import edu.uwm.cs.pir.utils.AWSS3API.AWSS3Config
+import edu.uwm.cs.pir.spark.SparkObject._
+import edu.uwm.cs.pir.utils.AWSS3API._
 import edu.uwm.cs.pir.Constants
 
 import scala.collection.JavaConverters._
@@ -28,7 +31,26 @@ import scala.collection.JavaConverters._
 import edu.uwm.cs.mir.prototypes.model.CCARelevanceResult
 
 object FileUtils {
-
+  
+  def pathToFileList(url : String) : List[String] = {
+    lazy val list: List[String] = {
+      if (url.endsWith(".jpg")) {
+        //This is for the case of query or such
+        List(url)
+      } else {
+        //log("image url = " + url)
+        if (awsS3Config.is_s3_storage) {
+          //log("isIs_s3_storage = true")
+          getIdList(url, "jpg")
+        } else {
+          //log("isIs_s3_storage = false")
+          FeatureUtils.getFilenameListByPath(url, "jpg").asScala.toList
+        }
+      }
+    }
+    list
+  }
+  
   def addJarToClasspath(s: String) = {
     val f = new File(s)
     val u = f.toURI()
