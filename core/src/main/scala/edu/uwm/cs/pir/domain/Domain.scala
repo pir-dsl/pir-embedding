@@ -180,7 +180,7 @@ import edu.uwm.cs.pir.Base
   
   // indexing
   trait Indexing extends Domain {
-    type Index[X];
+    type Index[X]
     def f_index[X]: IdxOp[X, Index[X]] // List[(ID, X)] => Index[X]
     def f_query[X]: DPrjOp[X, List[ID], Index[X]] // (X, Index[X]) => List[ID]
   }

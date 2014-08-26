@@ -13,7 +13,7 @@ trait Training extends Clustering with LatentTopic with CCA
 trait StringPath { type Path = String }
 
 trait FeatureLoadFunction extends Loading with CEDD with FCTH
-trait ImageQueryFunction extends FeatureLoadFunction with Indexing
+trait ImageQueryFunction[X] extends FeatureLoadFunction with Indexing
 
 import net.semanticmetadata.lire.imageanalysis.LireFeature
 
@@ -126,7 +126,7 @@ class LireCEDDFeatureToIndexData extends FeatureToIndexData[Data[LireCEDDWrapper
 }
 
 // Test implementation of the MIR domain functions
-trait StringFunction extends ImageQueryFunction {
+trait StringFunction extends ImageQueryFunction[String] {
   type ID = Int
   type Image = StringWrapper; type Text = StringWrapper
   type CEDD = StringWrapper; type FCTH = StringWrapper; type SIFT = StringWrapper

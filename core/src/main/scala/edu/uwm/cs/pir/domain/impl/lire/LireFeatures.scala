@@ -17,69 +17,65 @@ trait LireDomain extends Domain {
 }
 
 //TODO
-trait LireLuceneGlobal extends Lucene {
-  type Feature = LireFeature
-  type Document = org.apache.lucene.document.Document
-  def f_luceneDocTransformer = (feature : Feature) => {
-    var doc = new org.apache.lucene.document.Document
-    //doc = IndexUtils.getLuceneDocument(lireFeatureAdaptor.getId(), lireFeatureAdaptor.getLireFeature(), type);   
-    doc
-  }
-}
+//trait LireLuceneGlobal extends Lucene {
+//  type Feature = LireFeature
+//  type Document = org.apache.lucene.document.Document
+//  def f_luceneDocTransformer = (feature: Feature) => {
+//    var doc = new org.apache.lucene.document.Document
+//    doc
+//  }
+//}
 
-
-//TODO
 import net.semanticmetadata.lire.utils.LuceneUtils
 import org.apache.lucene.index.IndexWriter
-trait LireIndexFunction extends Indexing {
-  var indexLocation : String
+import org.apache.lucene.document.Document
+import org.apache.lucene.document.Field
+import net.semanticmetadata.lire.DocumentBuilder
+trait LireIndexFunction[X] extends Indexing {
+  var indexLocation: String
   type Index[X] = edu.uwm.cs.mir.prototypes.index.LuceneIndex
 
-  def f_index[LireFeature] = (s: List[(ID, LireFeature)]) => {
+  def f_index[X] = (s: List[(ID, X)]) => {
+    var indexWriter: IndexWriter = null;
+    try {
+      indexWriter = LuceneUtils.createIndexWriter(indexLocation, true);
+    } catch {
+      case e: java.io.IOException => throw new RuntimeException(e);
+    }
 
-	var indexWriter : IndexWriter = null;
-	try {
-	    indexWriter = LuceneUtils.createIndexWriter(indexLocation, true);
-	} catch {
-	  case e : java.io.IOException => throw new RuntimeException(e);
-	}
+    s.foreach {
+      elem =>
+        {
+          val doc = new Document
+          val id = elem._1
+          val lireFeature = elem._2
+          if (lireFeature == null) {
+            doc.add(new Field(lireFeature.getClass.getSimpleName(), Array[Byte] ()));
+          } else {
+            //TODO: check to see if we can avoid the below
+            doc.add(new Field(lireFeature.getClass.getSimpleName(), lireFeature.asInstanceOf[LireFeature].getByteArrayRepresentation));
+          }
+          if (id != null) doc.add(new Field(DocumentBuilder.FIELD_NAME_IDENTIFIER, id.toString, Field.Store.YES, Field.Index.NOT_ANALYZED));
+          try {
+            if (doc != null) {
+              indexWriter.addDocument(doc);
+            }
+          } catch {
+            // We may want to allow some failed index operations and
+            // continue with the process with other documents later
+            // so need to revisit this
+            case e: java.io.IOException => throw new RuntimeException(e);
+          }
+        }
+    }
 
-	s.foreach {
-	   // for (IFeature f : fs) {
-	  
-	  elem => elem._1
-	  
-//		if (f instanceof LuceneFeatureAdaptor) {
-//		    LuceneFeatureAdaptor luceneFeatureAdaptor = (LuceneFeatureAdaptor) f;
-//		    Document doc = luceneFeatureAdaptor.getDoc();
-//		    try {
-//			if (doc != null) {
-//			    IndexUtils.addOneDocToExistingIndex(indexWriter, doc);
-//			}
-//		    } catch (IOException e) {
-//			// We may want to allow some failed index operations and
-//			// continue with the process with other documents later
-//			// so need to revisit this
-//			throw new RuntimeException(e);
-//		    }
-//		}
-	    //}
-	}
-	try {
-	    indexWriter.close();
-	} catch {
-	  case e : Exception => throw new RuntimeException(e);
-	}
-	new edu.uwm.cs.mir.prototypes.index.LuceneIndex(indexLocation);
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    try {
+      indexWriter.close();
+    } catch {
+      case e: Exception => throw new RuntimeException(e);
+    }
+    new edu.uwm.cs.mir.prototypes.index.LuceneIndex(indexLocation);
+
   }
   def f_query[X] = (k: X, i: Index[X]) => List()
 }
@@ -87,7 +83,7 @@ trait LireIndexFunction extends Indexing {
 trait LireTraining extends Training
 
 trait LireGlobalFeatures extends GlobalFeatures with LireDomain {
-  var scaleWidth: Int;var scaleHeight: Int
+  var scaleWidth: Int; var scaleHeight: Int
   type AutoColorCorrelogram = net.semanticmetadata.lire.imageanalysis.AutoColorCorrelogram
   type BasicFeatures = net.semanticmetadata.lire.imageanalysis.BasicFeatures
   type BinaryPatternsPyramid = net.semanticmetadata.lire.imageanalysis.BinaryPatternsPyramid
@@ -110,103 +106,103 @@ trait LireGlobalFeatures extends GlobalFeatures with LireDomain {
   type Tamura = net.semanticmetadata.lire.imageanalysis.Tamura
 
   def f_autoColorCorrelogram: PrjOp[Image, AutoColorCorrelogram] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) => 
-        processLireFeature(image, new AutoColorCorrelogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.AutoColorCorrelogram]
+    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+      processLireFeature(image, new AutoColorCorrelogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.AutoColorCorrelogram]
   }
 
   def f_basicFeatures: PrjOp[Image, BasicFeatures] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-      	processLireFeature(image, new BasicFeatures).asInstanceOf[net.semanticmetadata.lire.imageanalysis.BasicFeatures]
+      processLireFeature(image, new BasicFeatures).asInstanceOf[net.semanticmetadata.lire.imageanalysis.BasicFeatures]
   }
 
   def f_binaryPatternsPyramid: PrjOp[Image, BinaryPatternsPyramid] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new BinaryPatternsPyramid).asInstanceOf[net.semanticmetadata.lire.imageanalysis.BinaryPatternsPyramid]
+      processLireFeature(image, new BinaryPatternsPyramid).asInstanceOf[net.semanticmetadata.lire.imageanalysis.BinaryPatternsPyramid]
   }
 
   def f_cedd: PrjOp[Image, CEDD] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new CEDD).asInstanceOf[net.semanticmetadata.lire.imageanalysis.CEDD]
+      processLireFeature(image, new CEDD).asInstanceOf[net.semanticmetadata.lire.imageanalysis.CEDD]
   }
 
   def f_colorLayout: PrjOp[Image, ColorLayout] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new ColorLayout).asInstanceOf[net.semanticmetadata.lire.imageanalysis.ColorLayout]
+      processLireFeature(image, new ColorLayout).asInstanceOf[net.semanticmetadata.lire.imageanalysis.ColorLayout]
   }
 
   def f_edgeHistogram: PrjOp[Image, EdgeHistogram] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new EdgeHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.EdgeHistogram]
+      processLireFeature(image, new EdgeHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.EdgeHistogram]
   }
 
   def f_fcth: PrjOp[Image, FCTH] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new FCTH).asInstanceOf[net.semanticmetadata.lire.imageanalysis.FCTH]
+      processLireFeature(image, new FCTH).asInstanceOf[net.semanticmetadata.lire.imageanalysis.FCTH]
   }
 
   def f_fuzzyColorHistogram: PrjOp[Image, FuzzyColorHistogram] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new FuzzyColorHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.FuzzyColorHistogram]
+      processLireFeature(image, new FuzzyColorHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.FuzzyColorHistogram]
   }
 
   def f_fuzzyOpponentHistogram: PrjOp[Image, FuzzyOpponentHistogram] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new FuzzyOpponentHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.FuzzyOpponentHistogram]
+      processLireFeature(image, new FuzzyOpponentHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.FuzzyOpponentHistogram]
   }
 
   def f_gabor: PrjOp[Image, Gabor] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new Gabor).asInstanceOf[net.semanticmetadata.lire.imageanalysis.Gabor]
+      processLireFeature(image, new Gabor).asInstanceOf[net.semanticmetadata.lire.imageanalysis.Gabor]
   }
 
   def f_jcd: PrjOp[Image, JCD] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new JCD).asInstanceOf[net.semanticmetadata.lire.imageanalysis.JCD]
+      processLireFeature(image, new JCD).asInstanceOf[net.semanticmetadata.lire.imageanalysis.JCD]
   }
 
   def f_jpegCoefficientHistogram: PrjOp[Image, JpegCoefficientHistogram] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new JpegCoefficientHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.JpegCoefficientHistogram]
+      processLireFeature(image, new JpegCoefficientHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.JpegCoefficientHistogram]
   }
 
   def f_localBinaryPatterns: PrjOp[Image, LocalBinaryPatterns] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new LocalBinaryPatterns).asInstanceOf[net.semanticmetadata.lire.imageanalysis.LocalBinaryPatterns]
+      processLireFeature(image, new LocalBinaryPatterns).asInstanceOf[net.semanticmetadata.lire.imageanalysis.LocalBinaryPatterns]
   }
 
   def f_luminanceLayout: PrjOp[Image, LuminanceLayout] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new LuminanceLayout).asInstanceOf[net.semanticmetadata.lire.imageanalysis.LuminanceLayout]
+      processLireFeature(image, new LuminanceLayout).asInstanceOf[net.semanticmetadata.lire.imageanalysis.LuminanceLayout]
   }
 
   def f_opponentHistogram: PrjOp[Image, OpponentHistogram] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new OpponentHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.OpponentHistogram]
+      processLireFeature(image, new OpponentHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.OpponentHistogram]
   }
 
   def f_phog: PrjOp[Image, PHOG] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new PHOG).asInstanceOf[net.semanticmetadata.lire.imageanalysis.PHOG]
+      processLireFeature(image, new PHOG).asInstanceOf[net.semanticmetadata.lire.imageanalysis.PHOG]
   }
 
   def f_rotationInvariantLocalBinaryPatterns: PrjOp[Image, RotationInvariantLocalBinaryPatterns] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new RotationInvariantLocalBinaryPatterns).asInstanceOf[net.semanticmetadata.lire.imageanalysis.RotationInvariantLocalBinaryPatterns]
+      processLireFeature(image, new RotationInvariantLocalBinaryPatterns).asInstanceOf[net.semanticmetadata.lire.imageanalysis.RotationInvariantLocalBinaryPatterns]
   }
 
   def f_scalableColor: PrjOp[Image, ScalableColor] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new ScalableColor).asInstanceOf[net.semanticmetadata.lire.imageanalysis.ScalableColor]
+      processLireFeature(image, new ScalableColor).asInstanceOf[net.semanticmetadata.lire.imageanalysis.ScalableColor]
   }
 
   def f_simpleColorHistogram: PrjOp[Image, SimpleColorHistogram] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new SimpleColorHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.SimpleColorHistogram]
+      processLireFeature(image, new SimpleColorHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.SimpleColorHistogram]
   }
 
   def f_tamura: PrjOp[Image, Tamura] = {
     (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
-        processLireFeature(image, new Tamura).asInstanceOf[net.semanticmetadata.lire.imageanalysis.Tamura]
+      processLireFeature(image, new Tamura).asInstanceOf[net.semanticmetadata.lire.imageanalysis.Tamura]
   }
 
   private def processLireFeature(image: edu.uwm.cs.mir.prototypes.feature.Image, lireFeature: net.semanticmetadata.lire.imageanalysis.LireFeature): net.semanticmetadata.lire.imageanalysis.LireFeature = {
