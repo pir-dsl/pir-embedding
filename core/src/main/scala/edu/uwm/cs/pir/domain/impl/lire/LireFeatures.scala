@@ -31,6 +31,9 @@ import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.document.Document
 import org.apache.lucene.document.Field
 import net.semanticmetadata.lire.DocumentBuilder
+import edu.uwm.cs.mir.prototypes.query.utils.QueryUtils
+import net.semanticmetadata.lire.ImageSearchHits
+
 trait LireIndexFunction[X] extends Indexing {
   var indexLocation: String
   type Index[X] = edu.uwm.cs.mir.prototypes.index.LuceneIndex
@@ -50,7 +53,7 @@ trait LireIndexFunction[X] extends Indexing {
           val id = elem._1
           val lireFeature = elem._2
           if (lireFeature == null) {
-            doc.add(new Field(lireFeature.getClass.getSimpleName(), Array[Byte] ()));
+            doc.add(new Field(lireFeature.getClass.getSimpleName(), Array[Byte]()));
           } else {
             //TODO: check to see if we can avoid the below
             doc.add(new Field(lireFeature.getClass.getSimpleName(), lireFeature.asInstanceOf[LireFeature].getByteArrayRepresentation));
@@ -61,9 +64,8 @@ trait LireIndexFunction[X] extends Indexing {
               indexWriter.addDocument(doc);
             }
           } catch {
-            // We may want to allow some failed index operations and
-            // continue with the process with other documents later
-            // so need to revisit this
+            // We may want to allow some failed index operations and continue with the process with 
+            // other documents later so need to revisit this
             case e: java.io.IOException => throw new RuntimeException(e);
           }
         }
@@ -77,7 +79,33 @@ trait LireIndexFunction[X] extends Indexing {
     new edu.uwm.cs.mir.prototypes.index.LuceneIndex(indexLocation);
 
   }
-  def f_query[X] = (k: X, i: Index[X]) => List()
+
+  def f_query[X] = (k: X, i: Index[X]) => {
+    //TODO: check to see if we can avoid the below
+    val queryFeature = k.asInstanceOf[LireFeature]
+    val featureType = queryFeature.getFeatureName.filter(char => if (' ' == char) false else true)
+
+    val queryDoc = new Document
+    if (queryFeature == null) {
+      queryDoc.add(new Field(queryFeature.getClass.getSimpleName(), Array[Byte]()));
+    } else {
+      //TODO: check to see if we can avoid the below
+      queryDoc.add(new Field(queryFeature.getClass.getSimpleName(), queryFeature.asInstanceOf[LireFeature].getByteArrayRepresentation));
+    }
+
+    var imageSearchHits: ImageSearchHits = null
+    try {
+      imageSearchHits = QueryUtils.getLuceneImageSearchHtsList(queryDoc, featureType, indexLocation);
+    } catch {
+      case e: Exception => throw new RuntimeException(e);
+    }
+    val resultLength = imageSearchHits.length
+    var resultList = List[ID]()
+    for (i: Int <- 1 to resultLength) {
+      resultList = resultList.::(imageSearchHits.doc(i).getField(DocumentBuilder.FIELD_NAME_IDENTIFIER).numericValue.asInstanceOf[ID])
+    }
+    resultList
+  }
 }
 
 trait LireTraining extends Training

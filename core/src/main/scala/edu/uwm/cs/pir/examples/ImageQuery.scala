@@ -1,6 +1,6 @@
 package edu.uwm.cs.pir.examples
 
-import edu.uwm.cs.pir.Constants.SAMPLE_IMAGES_ROOT
+import edu.uwm.cs.pir.Constants._
 import edu.uwm.cs.pir.domain.ImageQueryFunction
 import edu.uwm.cs.pir.domain.Loading
 import edu.uwm.cs.pir.domain.SimpleComposition
@@ -22,9 +22,9 @@ object TestSequential extends ExecutionConfig with Sequential with LireImageQuer
 }
 
 case class ExecutionConfig () {
-  var scaleWidth = 100
-  var scaleHeight = 100
-  var indexLocation = ""
+  var scaleWidth = SCALE_WIDTH
+  var scaleHeight = SCALE_HEIGHT
+  var indexLocation = INDEX_IMAGE_FEATURE_ROOT
 }
 
 trait LireImageQuery extends Pipeline with SimpleComposition with Loading /*with LireLuceneGlobal*/ with LireGlobalFeatures with LireDomain with LireIndexFunction[LireFeature] with ImageQueryFunction[LireFeature] with StringPath {
