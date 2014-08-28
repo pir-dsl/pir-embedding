@@ -19,7 +19,7 @@ package object Constants {
     val IMAGE_FEATURE_ROOT = DATA_ROOT + "image_features/"
     val CLUSTER_FIlE = DATA_ROOT + "image_cluster/clusters.ser"
     val LDA_MODEL_FIlE = DATA_ROOT + "text_model/lda_model.ser"
-    val INDEX_ROOT = DATA_ROOT + "index/"
+    val INDEX_ROOT = SAMPLES_ROOT + "index/"
     val INDEX_IMAGE_FEATURE_ROOT = INDEX_ROOT + "images/"
     val INDEX_TEXT_FEATURE_ROOT = INDEX_ROOT + "text/"
     

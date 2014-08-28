@@ -49,9 +49,9 @@ trait LireIndexFunction[X] extends Indexing {
     s.foreach {
       elem =>
         {
-          val doc = new Document
           val id = elem._1
           val lireFeature = elem._2
+          val doc = new Document
           if (lireFeature == null) {
             doc.add(new Field(lireFeature.getClass.getSimpleName(), Array[Byte]()));
           } else {

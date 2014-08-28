@@ -11,6 +11,7 @@ import edu.uwm.cs.pir.domain.impl.lire.LireGlobalFeatures
 import edu.uwm.cs.pir.domain.impl.lire.LireIndexFunction
 import edu.uwm.cs.pir.pipeline.Pipeline
 import edu.uwm.cs.pir.pipeline.Sequential
+import edu.uwm.cs.pir.pipeline.Print
 import edu.uwm.cs.pir.utils.FileUtils
 
 import net.semanticmetadata.lire.imageanalysis.LireFeature
@@ -35,7 +36,6 @@ trait LireImageQuery extends Pipeline with SimpleComposition with Loading /*with
     val img = load (f_image) (FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training"))
     val qImg = load (f_image) (List(SAMPLE_IMAGES_ROOT + "test/1000.jpg"))
 
-    //val cedd = img connect f_cedd connect f_luceneDocTransformer
     val f = (x: Image) => f_cedd(x)
 
     val idx = (img connect f) index f_index
