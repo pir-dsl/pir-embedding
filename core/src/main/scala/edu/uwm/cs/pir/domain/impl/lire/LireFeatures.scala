@@ -101,9 +101,14 @@ trait LireIndexFunction[X] extends Indexing {
     }
     val resultLength = imageSearchHits.length
     var resultList = List[ID]()
-    for (i: Int <- 1 to resultLength) {
-      resultList = resultList.::(imageSearchHits.doc(i).getField(DocumentBuilder.FIELD_NAME_IDENTIFIER).numericValue.asInstanceOf[ID])
+    for (i: Int <- 0 to resultLength - 1) {
+      val doc = imageSearchHits.doc(i)
+      resultList = resultList.:: {
+        val id = doc.getField(DocumentBuilder.FIELD_NAME_IDENTIFIER).stringValue
+        id/*.substring(id.lastIndexOf('/') + 1, id.length)*/.asInstanceOf[ID]
+      }
     }
+    resultList.foreach(id => println(id))
     resultList
   }
 }

@@ -43,6 +43,6 @@ trait LireImageQuery extends Pipeline with SimpleComposition with Loading /*with
     val x = (qImg connect f) query (f_query, idx)
 
     x.accept(v)
-    println(x.cache.get)
+    //x.cache.get
   }
 }

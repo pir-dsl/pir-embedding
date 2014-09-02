@@ -8,7 +8,7 @@
 	<classpathentry kind="lib" path="core/custom_lib/dom4j-2.0.0-ALPHA-2.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/DSL_MIR-0.0.1-SNAPSHOT.jar" sourcepath="/DSL_MIR/src/main/java"/>
 	<classpathentry kind="lib" path="core/custom_lib/hadoop-core-1.0.4.jar"/>
-	<classpathentry kind="lib" path="core/custom_lib/lire.jar"/>
+	<classpathentry kind="lib" path="core/custom_lib/lire.jar" sourcepath="/Lire-0.9.4-beta_2/src/main"/>
 	<classpathentry kind="lib" path="core/custom_lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/mallet-deps.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/mallet.jar"/>
@@ -28,7 +28,6 @@
 	<classpathentry kind="lib" path="lib_managed/jars/jackson-mapper-asl-1.8.9.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/junit-dep-4.8.2.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/junit-interface-0.9.jar"/>
-	<classpathentry kind="lib" path="/Users/xiaobinghuang/git/pir-embedding/lib_managed/jars/lucene-core-4.2.1.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/metadata-extractor-2.6.2.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/objenesis-1.2.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/scala-actors-2.10.1.jar"/>
@@ -45,7 +44,7 @@
 	<classpathentry kind="lib" path="lib_managed/jars/jakarta-regexp-1.4.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/jopensurf-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/lucene-analyzers-common-4.2.1.jar"/>
-	<classpathentry kind="lib" path="lib_managed/jars/lucene-core-4.2.1.jar"/>
+	<classpathentry kind="lib" path="lib_managed/jars/lucene-core-4.2.1.jar" sourcepath="/Users/xiaobinghuang/.m2/repository/org/apache/lucene/lucene-core/4.2.1/lucene-core-4.2.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/lucene-queries-4.2.1.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/lucene-queryparser-4.2.1.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/lucene-sandbox-4.2.1.jar"/>
