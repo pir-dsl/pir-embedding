@@ -28,7 +28,9 @@ case class ExecutionConfig () {
   var indexLocation = INDEX_IMAGE_FEATURE_ROOT
 }
 
-trait LireImageQuery extends Pipeline with SimpleComposition with Loading /*with LireLuceneGlobal*/ with LireGlobalFeatures with LireDomain with LireIndexFunction[LireFeature] with ImageQueryFunction[LireFeature] with StringPath {
+trait LireImageQuery extends Pipeline with SimpleComposition 
+  with Loading /*with LireLuceneGlobal*/ with LireGlobalFeatures with LireDomain 
+  with LireIndexFunction[LireFeature] with ImageQueryFunction[LireFeature] with StringPath {
   def f_image: LoadOp[Path, Image] = (p: Path) => new edu.uwm.cs.mir.prototypes.feature.Image(p)
   def f_text: LoadOp[Path, Text] = (p: Path) => new edu.uwm.cs.mir.prototypes.feature.Text(p)
 
