@@ -10,15 +10,15 @@ import edu.uwm.cs.pir.domain.impl.lire.LireDomain
 import edu.uwm.cs.pir.domain.impl.lire.LireGlobalFeatures
 import edu.uwm.cs.pir.domain.impl.lire.LireIndexFunction
 import edu.uwm.cs.pir.pipeline.Pipeline
-import edu.uwm.cs.pir.pipeline.Sequential
+import edu.uwm.cs.pir.pipeline.Parallel
 import edu.uwm.cs.pir.pipeline.Print
 import edu.uwm.cs.pir.utils.FileUtils
 
 import net.semanticmetadata.lire.imageanalysis.LireFeature
 
-object TestSequential extends ExecutionConfig with Sequential with LireImageQuery {
+object TestSequential extends ExecutionConfig with Parallel with LireImageQuery {
   def main(args: Array[String]): Unit = {
-    imageQuery(SequentialVisitor)
+    imageQuery(ParallelVisitor)
   }
 }
 

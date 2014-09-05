@@ -33,6 +33,10 @@ import org.apache.lucene.document.Field
 import net.semanticmetadata.lire.DocumentBuilder
 import edu.uwm.cs.mir.prototypes.query.utils.QueryUtils
 import net.semanticmetadata.lire.ImageSearchHits
+import net.semanticmetadata.lire.impl.SimpleImageSearchHits
+import net.semanticmetadata.lire.impl.SimpleResult
+import java.util.TreeSet
+import scala.collection.immutable.HashMap
 
 trait LireIndexFunction[X] extends Indexing {
   var indexLocation: String
@@ -56,7 +60,13 @@ trait LireIndexFunction[X] extends Indexing {
             doc.add(new Field(lireFeature.getClass.getSimpleName(), Array[Byte]()));
           } else {
             //TODO: check to see if we can avoid the below
-            doc.add(new Field(lireFeature.getClass.getSimpleName(), lireFeature.asInstanceOf[LireFeature].getByteArrayRepresentation));
+            lireFeature match {
+              case (x, y) => {
+                doc.add(new Field(x.getClass.getSimpleName(), x.asInstanceOf[LireFeature].getByteArrayRepresentation))
+                doc.add(new Field(y.getClass.getSimpleName(), y.asInstanceOf[LireFeature].getByteArrayRepresentation))
+              }
+              case _ => doc.add(new Field(lireFeature.getClass.getSimpleName(), lireFeature.asInstanceOf[LireFeature].getByteArrayRepresentation))
+            }
           }
           if (id != null) doc.add(new Field(DocumentBuilder.FIELD_NAME_IDENTIFIER, id.toString, Field.Store.YES, Field.Index.NOT_ANALYZED));
           try {
@@ -82,7 +92,92 @@ trait LireIndexFunction[X] extends Indexing {
 
   def f_query[X] = (k: X, i: Index[X]) => {
     //TODO: check to see if we can avoid the below
-    val queryFeature = k.asInstanceOf[LireFeature]
+    val lireSearchResult = {
+      k match {
+        case (x, y) => {
+          var queryFeature = x.asInstanceOf[LireFeature]
+          val searchHitsX = queryIndex(queryFeature)
+          queryFeature = y.asInstanceOf[LireFeature]
+          val searchHitsY = queryIndex(queryFeature)
+          combineFeatureResult(searchHitsX, searchHitsY)
+        }
+        case _ => {
+          val queryFeature = k.asInstanceOf[LireFeature]
+          convertFeatureResult(queryIndex(queryFeature))
+        }
+      }
+    }
+
+    val resultArray = lireSearchResult.toArray(Array[LireSearchResult]())
+    resultArray.foreach(println(_))
+    val resultLength = lireSearchResult.size
+    var resultList = List[ID]()
+    for (i: Int <- 0 to resultLength - 1) {
+      resultList = resultList.:: {
+        val id = resultArray(i).id
+        id /*.substring(id.lastIndexOf('/') + 1, id.length)*/ .asInstanceOf[ID]
+      }
+    }
+    resultList
+  }
+
+  case class LireSearchResult(val score: Float, val id: String) extends java.lang.Comparable[LireSearchResult] {
+    override def toString() = {
+      "id = " + id + ", score = " + score
+    }
+
+    //Descending order
+    override def compareTo(that: LireSearchResult) = {
+      if (this.score < that.score) 1
+      else if (this.score > that.score) -1
+      else 0
+    }
+  }
+
+  private def convertFeatureResult(searchHits: ImageSearchHits): TreeSet[LireSearchResult] = {
+    val docs: TreeSet[LireSearchResult] = new TreeSet[LireSearchResult]();
+    var maxDistance = -1f;
+    for (i: Int <- 0 to searchHits.length - 1) {
+      val tmpDistance = searchHits.score(i)
+      if (maxDistance < 0) {
+        maxDistance = tmpDistance;
+      }
+      docs.add(new LireSearchResult(tmpDistance, searchHits.doc(i).getField(DocumentBuilder.FIELD_NAME_IDENTIFIER).stringValue));
+      if (tmpDistance > maxDistance) maxDistance = tmpDistance;
+    }
+    docs
+  }
+
+  private def combineFeatureResult(searchHitsX: ImageSearchHits, searchHitsY: ImageSearchHits, weightPercentage: Float = 0.5F): TreeSet[LireSearchResult] = {
+    if (searchHitsX.length != searchHitsY.length) throw new Exception("Results from two different feature queries are not in the same size!")
+    else {
+      
+       var xMap: Map[String, Float] = Map()
+       var yMap: Map[String, Float] = Map()
+       
+       for (i: Int <- 0 to searchHitsX.length - 1) {
+    	   xMap += (searchHitsX.doc(i).getField(DocumentBuilder.FIELD_NAME_IDENTIFIER).stringValue -> searchHitsX.score(i))
+    	   yMap += (searchHitsY.doc(i).getField(DocumentBuilder.FIELD_NAME_IDENTIFIER).stringValue -> searchHitsY.score(i))
+       }
+      
+      val docs: TreeSet[LireSearchResult] = new TreeSet[LireSearchResult]();
+      var maxDistance = -1f;
+      
+      xMap.keySet.foreach( key => {
+        val score1 = xMap.get(key).get
+        val score2 = yMap.get(key).get
+        val tmpDistance = (xMap.get(key).get * weightPercentage + yMap.get(key).get * (1 - weightPercentage))
+        if (maxDistance < 0) {
+          maxDistance = tmpDistance;
+        }
+        docs.add(new LireSearchResult(tmpDistance, key));
+        if (tmpDistance > maxDistance) maxDistance = tmpDistance;
+      })
+      docs
+    }
+  }
+
+  private def queryIndex(queryFeature: net.semanticmetadata.lire.imageanalysis.LireFeature): ImageSearchHits = {
     val featureType = queryFeature.getFeatureName.filter(char => if (' ' == char) false else true)
 
     val queryDoc = new Document
@@ -90,7 +185,7 @@ trait LireIndexFunction[X] extends Indexing {
       queryDoc.add(new Field(queryFeature.getClass.getSimpleName(), Array[Byte]()));
     } else {
       //TODO: check to see if we can avoid the below
-      queryDoc.add(new Field(queryFeature.getClass.getSimpleName(), queryFeature.asInstanceOf[LireFeature].getByteArrayRepresentation));
+      queryDoc.add(new Field(queryFeature.getClass.getSimpleName(), queryFeature.asInstanceOf[LireFeature].getByteArrayRepresentation))
     }
 
     var imageSearchHits: ImageSearchHits = null
@@ -99,17 +194,7 @@ trait LireIndexFunction[X] extends Indexing {
     } catch {
       case e: Exception => throw new RuntimeException(e);
     }
-    val resultLength = imageSearchHits.length
-    var resultList = List[ID]()
-    for (i: Int <- 0 to resultLength - 1) {
-      val doc = imageSearchHits.doc(i)
-      resultList = resultList.:: {
-        val id = doc.getField(DocumentBuilder.FIELD_NAME_IDENTIFIER).stringValue
-        id/*.substring(id.lastIndexOf('/') + 1, id.length)*/.asInstanceOf[ID]
-      }
-    }
-    resultList.foreach(id => println(id))
-    resultList
+    imageSearchHits
   }
 }
 

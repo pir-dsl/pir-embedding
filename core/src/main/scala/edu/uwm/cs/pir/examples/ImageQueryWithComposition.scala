@@ -4,7 +4,7 @@ import edu.uwm.cs.pir.Constants._
 import edu.uwm.cs.pir.domain._
 import edu.uwm.cs.pir.domain.ImageQueryFunction
 import edu.uwm.cs.pir.domain.StringPath
-import edu.uwm.cs.pir.pipeline.Sequential
+import edu.uwm.cs.pir.pipeline.Parallel
 import edu.uwm.cs.pir.pipeline.Pipeline
 
 import edu.uwm.cs.pir.Constants.SAMPLE_IMAGES_ROOT
@@ -19,9 +19,9 @@ import net.semanticmetadata.lire.imageanalysis.LireFeature
 
 // Example MIR image query with global features
 
-object TestSequentialComposition extends ExecutionConfig1 with Sequential with Example {
+object TestSequentialComposition extends ExecutionConfig1 with Parallel with Example {
   def main(args: Array[String]): Unit = {
-    imageQuery(SequentialVisitor)
+    imageQuery(ParallelVisitor)
   }
 }
 
@@ -45,7 +45,6 @@ trait Example extends Pipeline with Loading with ImageQueryFunction[LireFeature]
     val x = (qImg connect f_cedd).join(qImg connect f_fcth)(f_compose) query (f_query, idx)
 
     x.accept(v)
-    println(x.cache.get)
   }
 
 }

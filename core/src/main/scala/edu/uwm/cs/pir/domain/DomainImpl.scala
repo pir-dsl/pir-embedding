@@ -66,13 +66,13 @@ trait SimpleSimilarity[X] extends Similarity {
 
 trait SimpleComposition extends Composition {
   
-  case class SimpleComposeImpl[X, Y](l: X, r: Y) {
+  /*case class SimpleComposeImpl[X, Y](l: X, r: Y) {
 	  (l, r)
-  }
+  }*/
     
-  type Compose[X, Y] = SimpleComposeImpl[X, Y]
+  type Compose[X, Y] = (X, Y)//SimpleComposeImpl[X, Y]
 
-  def f_compose[X, Y] = (x: X, y: Y) => SimpleComposeImpl(x, y)
+  def f_compose[X, Y] = (x: X, y: Y) => (x, y)//SimpleComposeImpl(x, y)
 }
 
 import edu.uwm.cs.pir.utils.AWSS3API.AWSS3Config
