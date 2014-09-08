@@ -6,20 +6,25 @@ trait GlobalFeatures extends AutoColorCorrelogram with BasicFeatures with Binary
 			with ColorLayout with EdgeHistogram with FCTH with FuzzyColorHistogram with FuzzyOpponentHistogram 
 			with Gabor with JCD with JpegCoefficientHistogram with LocalBinaryPatterns with LuminanceLayout 
 			with OpponentHistogram with PHOG with RotationInvariantLocalBinaryPatterns with ScalableColor with SimpleColorHistogram with Tamura
-trait LocalFeatures //extends SIFT with SurfFeature with MSER
+
+trait LocalFeatures extends SIFT with SurfFeature with MSER
 
 trait Training extends Clustering with LatentTopic with CCA
 
 trait StringPath { type Path = String }
 
-trait FeatureLoadFunction extends Loading with CEDD with FCTH
+trait GlobalFeatureLoadFunction extends Loading with CEDD with ColorLayout with EdgeHistogram with FCTH with FuzzyColorHistogram 
+      with FuzzyOpponentHistogram with Gabor with JCD with JpegCoefficientHistogram with LocalBinaryPatterns with LuminanceLayout 
+      with OpponentHistogram with PHOG with RotationInvariantLocalBinaryPatterns with ScalableColor with SimpleColorHistogram with Tamura
+
+trait LocalFeatureLoadFunction extends Loading with SIFT with SurfFeature with MSER
+
+trait FeatureLoadFunction extends GlobalFeatureLoadFunction with LocalFeatureLoadFunction
+
 trait ImageQueryFunction[X] extends FeatureLoadFunction with Indexing
 
 import net.semanticmetadata.lire.imageanalysis.LireFeature
-
-trait SFAFunction extends Loading with CEDD with Gabor with ColorLayout with SimpleSimilarity[IntWrapper] {
-   override def getDistance[X](x : X, y : X): Float = x.asInstanceOf[IntWrapper].x-y.asInstanceOf[IntWrapper].x
-}
+trait SFAFunction extends Similarity 
 
 class IntWrapper (val x : Int) extends ComparableData[IntWrapper] {
   override def compareTo (t : IntWrapper) = x.compare(t.x)
@@ -57,22 +62,18 @@ class StringWrapper (val x : String)  extends ComparableData[StringWrapper] {
 //  def f_compose[X, Y] = (x: X, y: Y) => ComposeImpl(x, y)
 //}
 
-trait SimpleSimilarity[X] extends Similarity { 
-  def getDistance[X](x : X, y : X) : Float
-  type Distance[X] = FloatWrapper
-  override def f_distance[X] = (x: X) => (y: X) => new FloatWrapper(getDistance[X](x, y))
-  override def f_order[X] = (x: (ID, X), y: (ID, X)) => false
-}
+//trait SimpleSimilarity[X] extends Similarity { 
+//  def getDistance[X](x : X, y : X) : Float
+//  type Distance[X] = FloatWrapper
+//  override def f_distance[X] = (x: X) => (y: X) => new FloatWrapper(getDistance[X](x, y))
+//  override def f_order[X] = (x: (ID, X), y: (ID, X)) => false
+//}
 
 trait SimpleComposition extends Composition {
   
-  /*case class SimpleComposeImpl[X, Y](l: X, r: Y) {
-	  (l, r)
-  }*/
-    
-  type Compose[X, Y] = (X, Y)//SimpleComposeImpl[X, Y]
+  type Compose[X, Y] = (X, Y)
 
-  def f_compose[X, Y] = (x: X, y: Y) => (x, y)//SimpleComposeImpl(x, y)
+  def f_compose[X, Y] = (x: X, y: Y) => (x, y)
 }
 
 import edu.uwm.cs.pir.utils.AWSS3API.AWSS3Config

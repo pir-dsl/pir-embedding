@@ -1,22 +1,44 @@
 package edu.uwm.cs.pir.examples
 
-import edu.uwm.cs.pir.pipeline._
-import edu.uwm.cs.pir.domain._
+import edu.uwm.cs.pir.Constants._
 
-object TestSFA extends Sequential with NumberFunction with SimpleComposition with Example3 {
+import edu.uwm.cs.pir.domain.impl.lire.LireDomain
+import edu.uwm.cs.pir.domain.FeatureLoadFunction
+import edu.uwm.cs.pir.domain.SFAFunction
+import edu.uwm.cs.pir.domain.impl.lire.LireGlobalFeatures
+import edu.uwm.cs.pir.domain.impl.lire.LireLocalFeatures
+import edu.uwm.cs.pir.domain.Loading
+import edu.uwm.cs.pir.domain.StringPath
+import edu.uwm.cs.pir.domain.impl.lire.LireDomain
+import edu.uwm.cs.pir.domain.impl.lire.LireGlobalFeatures
+import edu.uwm.cs.pir.domain.impl.lire.LireGlobalSimilarity
+import edu.uwm.cs.pir.pipeline.Pipeline
+import edu.uwm.cs.pir.pipeline.Sequential
+import net.semanticmetadata.lire.imageanalysis.LireFeature
+import edu.uwm.cs.pir.utils.FileUtils
+
+object TestSFA extends ExecutionConfig2 with Sequential with Example3 {
   def main(args: Array[String]): Unit = {
     query(SequentialVisitor)
   }
 }
 
-trait Example3 extends Pipeline with SFAFunction with StringPath {
-  def query(v: PipelineVisitor) {
-    val qImg = f_image("image_3") 
-//    val gabor = f_gabor(qImg)
-//    val color = f_colorlayout(qImg)
-//    val cedd = f_cedd(qImg)
+case class ExecutionConfig2() {
+  var scaleWidth = SCALE_WIDTH
+  var scaleHeight = SCALE_HEIGHT
+}
 
-    val img = f_image(List("image_4", "image_2", "image_5", "image_3", "image_6"))
+trait Example3 extends Pipeline with FeatureLoadFunction with SFAFunction with LireGlobalFeatures
+  with LireLocalFeatures with LireGlobalSimilarity with LireDomain with StringPath {
+
+  def f_image: LoadOp[Path, Image] = (p: Path) => new edu.uwm.cs.mir.prototypes.feature.Image(p)
+  def f_text: LoadOp[Path, Text] = (p: Path) => new edu.uwm.cs.mir.prototypes.feature.Text(p)
+
+  def query(v: PipelineVisitor) {
+	  
+    val qImg = f_image(SAMPLE_IMAGES_ROOT + "test/1000.jpg")
+
+    val img = load (f_image) (FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training"))
     val x = img connect f_colorLayout connect f_distance(f_colorLayout(qImg)) sort f_order top 4
 
     def f_filter(l: List[(ID, _)]) = { val idl = l.map(e => e._1); (x: (ID, _)) => idl.contains(x._1) }
@@ -28,9 +50,9 @@ trait Example3 extends Pipeline with SFAFunction with StringPath {
     val r = img.filter(f_filter, z)
 
     r.accept(v)
-     println(x.cache.get)
-      println(y.cache.get)
-       println(z.cache.get)
+    println(x.cache.get)
+    println(y.cache.get)
+    println(z.cache.get)
     println(r.cache.get)
   }
 }

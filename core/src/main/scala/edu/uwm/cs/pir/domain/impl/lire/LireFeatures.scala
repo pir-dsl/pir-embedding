@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage
 import edu.uwm.cs.mir.prototypes.feature.lire.utils.LireFeatureUtils
 import net.semanticmetadata.lire.imageanalysis.LireFeature
 import edu.uwm.cs.mir.prototypes.feature.utils.FeatureUtils
+import scala.collection.JavaConverters._
 
 trait LireDomain extends Domain {
   type Image = edu.uwm.cs.mir.prototypes.feature.Image
@@ -151,19 +152,19 @@ trait LireIndexFunction[X] extends Indexing {
   private def combineFeatureResult(searchHitsX: ImageSearchHits, searchHitsY: ImageSearchHits, weightPercentage: Float = 0.5F): TreeSet[LireSearchResult] = {
     if (searchHitsX.length != searchHitsY.length) throw new Exception("Results from two different feature queries are not in the same size!")
     else {
-      
-       var xMap: Map[String, Float] = Map()
-       var yMap: Map[String, Float] = Map()
-       
-       for (i: Int <- 0 to searchHitsX.length - 1) {
-    	   xMap += (searchHitsX.doc(i).getField(DocumentBuilder.FIELD_NAME_IDENTIFIER).stringValue -> searchHitsX.score(i))
-    	   yMap += (searchHitsY.doc(i).getField(DocumentBuilder.FIELD_NAME_IDENTIFIER).stringValue -> searchHitsY.score(i))
-       }
-      
+
+      var xMap: Map[String, Float] = Map()
+      var yMap: Map[String, Float] = Map()
+
+      for (i: Int <- 0 to searchHitsX.length - 1) {
+        xMap += (searchHitsX.doc(i).getField(DocumentBuilder.FIELD_NAME_IDENTIFIER).stringValue -> searchHitsX.score(i))
+        yMap += (searchHitsY.doc(i).getField(DocumentBuilder.FIELD_NAME_IDENTIFIER).stringValue -> searchHitsY.score(i))
+      }
+
       val docs: TreeSet[LireSearchResult] = new TreeSet[LireSearchResult]();
       var maxDistance = -1f;
-      
-      xMap.keySet.foreach( key => {
+
+      xMap.keySet.foreach(key => {
         val score1 = xMap.get(key).get
         val score2 = yMap.get(key).get
         val tmpDistance = (xMap.get(key).get * weightPercentage + yMap.get(key).get * (1 - weightPercentage))
@@ -195,6 +196,18 @@ trait LireIndexFunction[X] extends Indexing {
       case e: Exception => throw new RuntimeException(e);
     }
     imageSearchHits
+  }
+}
+
+import edu.uwm.cs.pir.domain.Similarity
+trait LireGlobalSimilarity extends Similarity {
+  type Distance[X] = Float
+  def f_distance[X](y: X): X => PrjOp[X, Distance[X]] = x => x => x.asInstanceOf[LireFeature].getDistance(y.asInstanceOf[LireFeature])
+  def f_order[X]: OdrOp[X] = (x, y) => {
+    if (x._2.asInstanceOf[LireFeature].getDistance(y._2.asInstanceOf[LireFeature]) > 0)
+      true
+    else
+      false
   }
 }
 
@@ -339,4 +352,43 @@ trait LireGlobalFeatures extends GlobalFeatures with LireDomain {
   }
 }
 
-trait LireLocalFeatures extends LocalFeatures
+import net.semanticmetadata.lire.imageanalysis.mser.MSER
+import net.semanticmetadata.lire.utils.ImageUtils
+
+trait LireLocalFeatures extends LocalFeatures with LireDomain {
+  type SIFT = List[net.semanticmetadata.lire.imageanalysis.sift.Feature]
+  type SurfFeature = List[com.stromberglabs.jopensurf.SURFInterestPoint]
+  type MSER = List[net.semanticmetadata.lire.imageanalysis.mser.MSERFeature]
+
+  override def f_sift: PrjOp[Image, SIFT] = {
+    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+      {
+        val extractor = new net.semanticmetadata.lire.imageanalysis.sift.Extractor
+        extractor.computeSiftFeatures(image.getFeature).asScala.toList
+      }
+  }
+
+  def f_surfFeature: PrjOp[Image, SurfFeature] = {
+    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+      val s = new com.stromberglabs.jopensurf.Surf(image.getFeature);
+      s.getFreeOrientedInterestPoints.asScala.toList
+  }
+
+  def f_mser: PrjOp[Image, MSER] = {
+    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+      {
+        val extractor = new net.semanticmetadata.lire.imageanalysis.mser.MSER
+        val greyImage: BufferedImage = convertImageToGrey(image.getFeature)
+        val features = extractor.computeMSERFeatures(greyImage)
+        ImageUtils.invertImage(greyImage);
+        features.addAll(extractor.computeMSERFeatures(greyImage))
+        features.asScala.toList
+      }
+  }
+
+  private def convertImageToGrey(image: BufferedImage): BufferedImage = {
+    val result = new BufferedImage(image.getWidth, image.getHeight, BufferedImage.TYPE_BYTE_GRAY)
+    result.getGraphics.drawImage(image, 0, 0, null)
+    result
+  }
+}

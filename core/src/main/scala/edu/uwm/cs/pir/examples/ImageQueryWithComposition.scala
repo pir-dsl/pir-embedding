@@ -1,17 +1,16 @@
 package edu.uwm.cs.pir.examples
 
 import edu.uwm.cs.pir.Constants._
-import edu.uwm.cs.pir.domain._
 import edu.uwm.cs.pir.domain.ImageQueryFunction
 import edu.uwm.cs.pir.domain.StringPath
 import edu.uwm.cs.pir.pipeline.Parallel
 import edu.uwm.cs.pir.pipeline.Pipeline
-
 import edu.uwm.cs.pir.Constants.SAMPLE_IMAGES_ROOT
 import edu.uwm.cs.pir.utils.FileUtils
 
 import edu.uwm.cs.pir.domain.impl.lire.LireDomain
 import edu.uwm.cs.pir.domain.impl.lire.LireGlobalFeatures
+import edu.uwm.cs.pir.domain.impl.lire.LireLocalFeatures
 import edu.uwm.cs.pir.domain.impl.lire.LireIndexFunction
 import edu.uwm.cs.pir.domain.SimpleComposition
 
@@ -19,7 +18,7 @@ import net.semanticmetadata.lire.imageanalysis.LireFeature
 
 // Example MIR image query with global features
 
-object TestSequentialComposition extends ExecutionConfig1 with Parallel with Example {
+object TestImageQueryWithComposition extends ExecutionConfig1 with Parallel with Example {
   def main(args: Array[String]): Unit = {
     imageQuery(ParallelVisitor)
   }
@@ -31,7 +30,7 @@ case class ExecutionConfig1 () {
   var indexLocation = INDEX_IMAGE_FEATURE_ROOT
 }
 
-trait Example extends Pipeline with Loading with ImageQueryFunction[LireFeature] with LireGlobalFeatures with LireDomain 
+trait Example extends Pipeline with ImageQueryFunction[LireFeature] with LireGlobalFeatures with LireLocalFeatures with LireDomain 
       with LireIndexFunction[LireFeature] with SimpleComposition with StringPath {
   
   def f_image: LoadOp[Path, Image] = (p: Path) => new edu.uwm.cs.mir.prototypes.feature.Image(p)

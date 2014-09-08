@@ -42,7 +42,7 @@
 	<classpathentry kind="lib" path="core/custom_lib/jerkson.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/commons-math3-3.2.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/jakarta-regexp-1.4.jar"/>
-	<classpathentry kind="lib" path="lib_managed/jars/jopensurf-1.0.0.jar"/>
+	<classpathentry kind="lib" path="lib_managed/jars/jopensurf-1.0.0.jar" sourcepath="/Users/xiaobinghuang/.m2/repository/com/sangupta/jopensurf/1.0.0/jopensurf-1.0.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/lucene-analyzers-common-4.2.1.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/lucene-core-4.2.1.jar" sourcepath="/Users/xiaobinghuang/.m2/repository/org/apache/lucene/lucene-core/4.2.1/lucene-core-4.2.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/lucene-queries-4.2.1.jar"/>
