@@ -13,13 +13,13 @@ import edu.uwm.cs.pir.domain.impl.lire.LireDomain
 import edu.uwm.cs.pir.domain.impl.lire.LireGlobalFeatures
 import edu.uwm.cs.pir.domain.impl.lire.LireGlobalSimilarity
 import edu.uwm.cs.pir.pipeline.Pipeline
-import edu.uwm.cs.pir.pipeline.Sequential
+import edu.uwm.cs.pir.pipeline.Parallel
 import net.semanticmetadata.lire.imageanalysis.LireFeature
 import edu.uwm.cs.pir.utils.FileUtils
 
-object TestSFA extends ExecutionConfig2 with Sequential with Example3 {
+object TestSFA extends ExecutionConfig2 with Parallel with Example3 {
   def main(args: Array[String]): Unit = {
-    query(SequentialVisitor)
+    query(ParallelVisitor)
   }
 }
 
@@ -39,20 +39,20 @@ trait Example3 extends Pipeline with FeatureLoadFunction with SFAFunction with L
     val qImg = f_image(SAMPLE_IMAGES_ROOT + "test/1000.jpg")
 
     val img = load (f_image) (FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training"))
-    val x = img connect f_colorLayout connect f_distance(f_colorLayout(qImg)) sort f_order top 4
+    val x = img connect f_colorLayout connect f_distance(f_colorLayout(qImg)) sort f_order top 8
 
-    //def f_filter(l: List[(ID, _)]) = { val idl = l.map(e => e._1); (x: (ID, _)) => idl.contains(x._1) }
+    def f_filter(l: List[(ID, _)]) = { val idl = l.map(e => e._1); (x: (ID, _)) => idl.contains(x._1) }
 
-    //val y = img.filter(f_filter, x) connect f_cedd connect f_distance(f_cedd(qImg)) sort f_order top 3
+    val y = img.filter(f_filter, x) connect f_cedd connect f_distance(f_cedd(qImg)) sort f_order top 5
 
-    //val z = img.filter(f_filter, y) connect f_gabor connect f_distance(f_gabor(qImg)) sort f_order top 2
+    val z = img.filter(f_filter, y) connect f_gabor connect f_distance(f_gabor(qImg)) sort f_order top 2
 
-    //val r = img.filter(f_filter, z)
+    val r = img.filter(f_filter, z)
 
-    x.accept(v)
+    r.accept(v)
     println(x.cache.get)
-    //println(y.cache.get)
-    //println(z.cache.get)
-    //println(r.cache.get)
+    println(y.cache.get)
+    println(z.cache.get)
+    println(r.cache.get)
   }
 }
