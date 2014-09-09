@@ -202,7 +202,7 @@ trait LireIndexFunction[X] extends Indexing {
 import edu.uwm.cs.pir.domain.Similarity
 trait LireGlobalSimilarity extends Similarity {
   type Distance[X] = Float
-  def f_distance[X](y: X): X => PrjOp[X, Distance[X]] = x => x => x.asInstanceOf[LireFeature].getDistance(y.asInstanceOf[LireFeature])
+  def f_distance[X]: X => PrjOp[X, Distance[X]] = x => x => 1.0F//x.asInstanceOf[LireFeature].getDistance(y.asInstanceOf[LireFeature])
   def f_order[X]: OdrOp[X] = (x, y) => {
     if (x._2.asInstanceOf[LireFeature].getDistance(y._2.asInstanceOf[LireFeature]) > 0)
       true

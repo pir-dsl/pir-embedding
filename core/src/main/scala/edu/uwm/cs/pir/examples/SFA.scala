@@ -41,18 +41,18 @@ trait Example3 extends Pipeline with FeatureLoadFunction with SFAFunction with L
     val img = load (f_image) (FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training"))
     val x = img connect f_colorLayout connect f_distance(f_colorLayout(qImg)) sort f_order top 4
 
-    def f_filter(l: List[(ID, _)]) = { val idl = l.map(e => e._1); (x: (ID, _)) => idl.contains(x._1) }
+    //def f_filter(l: List[(ID, _)]) = { val idl = l.map(e => e._1); (x: (ID, _)) => idl.contains(x._1) }
 
-    val y = img.filter(f_filter, x) connect f_cedd connect f_distance(f_cedd(qImg)) sort f_order top 3
+    //val y = img.filter(f_filter, x) connect f_cedd connect f_distance(f_cedd(qImg)) sort f_order top 3
 
-    val z = img.filter(f_filter, y) connect f_gabor connect f_distance(f_gabor(qImg)) sort f_order top 2
+    //val z = img.filter(f_filter, y) connect f_gabor connect f_distance(f_gabor(qImg)) sort f_order top 2
 
-    val r = img.filter(f_filter, z)
+    //val r = img.filter(f_filter, z)
 
-    r.accept(v)
+    x.accept(v)
     println(x.cache.get)
-    println(y.cache.get)
-    println(z.cache.get)
-    println(r.cache.get)
+    //println(y.cache.get)
+    //println(z.cache.get)
+    //println(r.cache.get)
   }
 }

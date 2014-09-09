@@ -128,7 +128,10 @@ trait Sequential extends Stage {
     def visit[X, Y](s: SourcePipe[X, Y]) 										= s.testAndSet( () => {
         		s.left.accept(this)
         		s.right.accept(this)
-        		s.left.get.map(f => (f._1, s.right.get(f._2))) 
+        		s.left.get.map(f => 
+        		  {
+        		    (f._1, s.right.get(f._2))
+        		  })
         	}
         )
     def visit[X, L](f: FilterPipe[X, L]) 										= f.testAndSet( () => {
