@@ -4,12 +4,8 @@ import edu.uwm.cs.pir.spark.SparkObject._
 
 import scala.collection.JavaConversions._
 
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.net.MalformedURLException
-import java.net.URI
-import java.net.URL
+import java.io._
+import java.net._
 
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3Client

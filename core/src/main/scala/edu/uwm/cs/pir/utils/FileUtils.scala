@@ -1,34 +1,20 @@
 package edu.uwm.cs.pir.utils
 
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
-import java.lang.reflect.Method
-import java.net.URI
-import java.net.URL
-import java.net.URLClassLoader
+import java.io._
+import java.net._
 import java.util.Vector
+import java.lang.reflect.Method
 
 import org.apache.lucene.document.Document
-
+import scala.collection.JavaConverters._
 import cc.mallet.topics.ParallelTopicModel
-
-import edu.uwm.cs.mir.prototypes.feature.utils.FeatureUtils
 
 import edu.uwm.cs.pir.utils.GeneralUtils._
 import edu.uwm.cs.pir.spark.SparkObject._
 import edu.uwm.cs.pir.utils.AWSS3API._
-import edu.uwm.cs.pir.Constants
-
-import scala.collection.JavaConverters._
 
 import edu.uwm.cs.mir.prototypes.model.CCARelevanceResult
+import edu.uwm.cs.mir.prototypes.feature.utils.FeatureUtils
 
 object FileUtils {
   

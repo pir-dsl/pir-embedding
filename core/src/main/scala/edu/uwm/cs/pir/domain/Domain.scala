@@ -220,22 +220,22 @@ import edu.uwm.cs.pir.Base
     def f_cca_proj2[X, Y]: DPrjOp[Y, List[ID], CCA[X, Y]] // (Y, CCA[X, Y]) => List[ID]
   }
   
-  trait Data[X]
-  
-  trait ComparableData[X] extends Data[X] with Comparable[X]
-  
-  trait IndexData[X] extends Data[X]
-  
-  trait IndexResult[X] extends Data[X]
-  
-  trait FeatureToIndexData[X] {
-	 def f_feature2Index : X => IndexData[X]
-  }
-  
-  trait IndexDataToFeature[X] {
-    def f_index2Feature: IndexData[X] => X
-  }
-  
-  trait Search[X] {
-    def search(q : X) : List[IndexResult[X]] 
-  }
+//  trait Data[X]
+//  
+//  trait ComparableData[X] extends Data[X] with Comparable[X]
+//  
+//  trait IndexData[X] extends Data[X]
+//  
+//  trait IndexResult[X] extends Data[X]
+//  
+//  trait FeatureToIndexData[X] {
+//	 def f_feature2Index : X => IndexData[X]
+//  }
+//  
+//  trait IndexDataToFeature[X] {
+//    def f_index2Feature: IndexData[X] => X
+//  }
+//  
+//  trait Search[X] {
+//    def search(q : X) : List[IndexResult[X]] 
+//  }

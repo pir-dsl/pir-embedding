@@ -398,3 +398,5 @@ trait LireLocalFeatures extends LocalFeatures with LireDomain {
     result
   }
 }
+
+trait LireFeatures extends LireGlobalFeatures with LireLocalFeatures

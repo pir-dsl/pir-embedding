@@ -1,20 +1,13 @@
 package edu.uwm.cs.pir.utils
 
-import java.io.IOException
-import java.io.InputStream
-import java.io.File
-import java.io.ByteArrayInputStream
-import java.net.URL
+import java.io._
+import java.net._
 
 import org.apache.commons.io.IOUtils
-
 import java.awt.image.BufferedImage
-import javax.imageio.ImageIO
-import javax.imageio.ImageReadParam
-import javax.imageio.ImageReader
-import javax.imageio.ImageTypeSpecifier
-import javax.imageio.stream.FileImageInputStream
-import javax.imageio.stream.ImageInputStream
+
+import javax.imageio._
+import javax.imageio.stream._
 
 import scala.util.control.Breaks._
 

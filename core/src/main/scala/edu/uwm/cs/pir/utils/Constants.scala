@@ -1,4 +1,4 @@
-package edu.uwm.cs.pir
+package edu.uwm.cs.pir.utils
 
 import edu.uwm.cs.pir.spark.SparkObject._
 //import edu.uwm.cs.pir.strategy.Strategy._
