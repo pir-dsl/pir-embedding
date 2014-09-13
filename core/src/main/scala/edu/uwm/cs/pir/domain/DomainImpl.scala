@@ -3,6 +3,8 @@ package edu.uwm.cs.pir.domain
 import edu.uwm.cs.pir.domain._
 import net.semanticmetadata.lire.imageanalysis.LireFeature
 
+trait WikiFeatures extends WikiFeature
+
 trait GlobalFeatures extends AutoColorCorrelogram with BasicFeatures with BinaryPatternsPyramid with CEDD
 			with ColorLayout with EdgeHistogram with FCTH with FuzzyColorHistogram with FuzzyOpponentHistogram 
 			with Gabor with JCD with JpegCoefficientHistogram with LocalBinaryPatterns with LuminanceLayout 

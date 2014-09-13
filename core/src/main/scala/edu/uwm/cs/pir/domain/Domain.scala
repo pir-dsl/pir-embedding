@@ -30,6 +30,11 @@ import edu.uwm.cs.pir.Base
     def f_image: LoadOp[Path, Image] // Path => List[Feature[Image]]
     def f_text: LoadOp[Path, Text] // Path => List[Feature[Text]]
   }
+  
+  trait WikiFeature extends Domain {
+    type WikiFeatureExtractor
+    def f_wikiFeatureExtractor : PrjOp[Text, WikiFeatureExtractor]
+  }
 
   // global features
   
@@ -197,19 +202,21 @@ import edu.uwm.cs.pir.Base
   // machine learning
 
   trait Clustering extends Domain {
-    type Histogram[X]
-    type Cluster[X]
+    type X
+    type Histogram
+    type Cluster
 
-    def f_cluster_train[X]: TrnOp[X, Cluster[X]] // List[(ID, X)] => Cluster[X]
-    def f_cluster_proj[X]: DPrjOp[X, Histogram[X], Cluster[X]] // (X, Cluster[X]) => Histogram[X]  
+    def f_cluster_train: TrnOp[X, Cluster] // List[(ID, X)] => Cluster[X]
+    def f_cluster_proj: DPrjOp[X, Histogram, Cluster] // (X, Cluster[X]) => Histogram[X]  
   }
 
   trait LatentTopic extends Domain {
-    type Distribution[X]
-    type Topic[X]
+    type Distribution
+    type Topic
 
-    def f_lda_train[X]: TrnOp[X, Topic[X]] // List[(ID, X)] => Topic[X]
-    def f_lda_proj[X]: DPrjOp[X, Distribution[X], Topic[X]] // (X, Topic[X]) => Distribution[X]  
+    type Lda_Input
+    def f_lda_train: TrnOp[Lda_Input, Topic] // List[(ID, X)] => Topic[X]
+    def f_lda_proj: DPrjOp[Lda_Input, Distribution, Topic] // (X, Topic[X]) => Distribution[X]  
   }
 
   trait CCA extends Domain {
