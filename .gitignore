@@ -5,3 +5,5 @@
 /project/target
 /project/project/target
 /assembly
+/samples/image_cluster/clusters.ser
+/samples/text_model/lda_model.ser
