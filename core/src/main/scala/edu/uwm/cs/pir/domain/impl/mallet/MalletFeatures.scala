@@ -267,9 +267,12 @@ trait MalletTraining extends Training {
         var model: ParallelTopicModel = null
         val instances = getInstanceList(stopwordFile)
         try {
-          model = getLDAModel(descFile, instances)
           println("ldaModelFile = " + ldaModelFile)
-          Utils.serializeObject(model, config, ldaModelFile, false)
+          val file = new File(ldaModelFile)
+          if (!((file).exists())) {
+        	  model = getLDAModel(descFile, instances)
+        	  Utils.serializeObject(model, config, ldaModelFile, false)
+          }
         } catch {
           case e: Exception => throw new RuntimeException(e.getMessage)
         }

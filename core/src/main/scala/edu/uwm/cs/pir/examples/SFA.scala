@@ -36,7 +36,7 @@ trait Example3 extends Pipeline with FeatureLoadFunction with SFAFunction with L
 	  
     val qImg = f_image(SAMPLE_IMAGES_ROOT + "test/query.jpg")
 
-    val img = load (f_image) (FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training"))
+    val img = load (f_image) (FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training", IMAGE))
     val x = img connect f_colorLayout connect f_distance(f_colorLayout(qImg)) sort f_order top 3
 
     def f_filter(l: List[(ID, _)]) = { val idl = l.map(e => e._1); (x: (ID, _)) => idl.contains(x._1) }

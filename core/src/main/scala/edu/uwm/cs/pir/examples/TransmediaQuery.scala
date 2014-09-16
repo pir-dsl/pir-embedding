@@ -28,15 +28,16 @@ trait Example4 extends Pipeline with FeatureLoadFunction with LireFeatures with 
   def f_text: LoadOp[Path, Text] = (p: Path) => new edu.uwm.cs.mir.prototypes.feature.Text(p)
 
   def query(v: PipelineVisitor) {
-    val img = load(f_image)(FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training"))
-    val txt = load(f_text)(FileUtils.pathToFileList(SAMPLE_TEXT_ROOT + "training"))
+    val img = load(f_image)(FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training", IMAGE))
+    val txt = load(f_text)(FileUtils.pathToFileList(SAMPLE_TEXT_ROOT + "training", TEXT))
     val qImg = load(f_image)(List(SAMPLE_IMAGES_ROOT + "test/query.jpg"))
 
     val siftImg = img.connect(f_sift)
-    val lda = txt.connect(f_wikiFeatureExtractor).train(f_lda_train)
+    val xmlText = txt.connect(f_wikiFeatureExtractor)
+    val lda = xmlText.train(f_lda_train)
     val cluster = siftImg.train(f_cluster_train)
 
-    val topic = txt.connect(f_wikiFeatureExtractor).connect(lda)(f_lda_proj)
+    val topic = xmlText.connect(lda)(f_lda_proj)
     val histogram = siftImg.connect(cluster)(f_cluster_proj)
 
     val composed = topic.join(histogram) // ((x,y)=>(x,y))

@@ -44,6 +44,8 @@ package object Constants {
     val NUMBER_ITERATION = 1000
     val NUMBER_SAMPLER = 4
 
+    val IMAGE = "image"
+    val TEXT = "text"
     // Use Gibbs sampling to infer a topic distribution. Topics are initialized
     // to the (or a) most probable topic for each token. Using zero iterations
     // returns exactly this initial topic distribution. This code does not

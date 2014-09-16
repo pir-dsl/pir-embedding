@@ -32,7 +32,7 @@ trait Example extends Pipeline with ImageQueryFunction[LireFeature] with LireGlo
   def f_text: LoadOp[Path, Text] = (p: Path) => new edu.uwm.cs.mir.prototypes.feature.Text(p)
   
   def imageQuery(v: PipelineVisitor) {
-    val img = load (f_image) (FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training"))
+    val img = load (f_image) (FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training", IMAGE))
     val qImg = load (f_image) (List(SAMPLE_IMAGES_ROOT + "test/query.jpg"))
     val idx = (img connect f_cedd).join(img connect f_fcth)(f_compose) index f_index
 

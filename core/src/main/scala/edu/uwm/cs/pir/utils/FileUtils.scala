@@ -18,19 +18,20 @@ import edu.uwm.cs.mir.prototypes.feature.utils.FeatureUtils
 
 object FileUtils {
   
-  def pathToFileList(url : String) : List[String] = {
+  def pathToFileList(url : String, modalityType : String) : List[String] = {
     lazy val list: List[String] = {
-      if (url.endsWith(".jpg")) {
+      if (url.endsWith(".jpg") || url.endsWith(".xml")) {
         //This is for the case of query or such
         List(url)
       } else {
+        val ext =  if ("image".equals(modalityType)) "jpg" else "xml"
         //log("image url = " + url)
         if (awsS3Config.is_s3_storage) {
           //log("isIs_s3_storage = true")
-          getIdList(url, "jpg")
+          getIdList(url, ext)
         } else {
           //log("isIs_s3_storage = false")
-          FeatureUtils.getFilenameListByPath(url, "jpg").asScala.toList
+          FeatureUtils.getFilenameListByPath(url, ext).asScala.toList
         }
       }
     }
