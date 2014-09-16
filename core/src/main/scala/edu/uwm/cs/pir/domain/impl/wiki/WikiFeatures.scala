@@ -10,18 +10,20 @@ trait InternalWikiFeatures extends WikiFeatures with LireDomain {
   type WikiFeatureExtractor = edu.uwm.cs.mir.prototypes.feature.wikipedia.WikiPediaTextAdaptor
   def f_wikiFeatureExtractor: PrjOp[Text, WikiFeatureExtractor] = {
     (text: edu.uwm.cs.mir.prototypes.feature.Text) =>
-      //TODO
-      //if (awsS3Config.isIs_s3_storage()) wikiPediaDataSetTextExtract.setAWSS3Config(awsS3Config)
-      
-	var textContent = ""
-	try {
-	    // filename = filename.substring(filename.lastIndexOf("/") + 1,
-	    // filename.lastIndexOf("."));
-	    textContent = XmlParserUtils.getTextFromXmlFileContent(text.getFeature, "text")
-	    //FileUtils.writeStringToFile(new File(extractedTextFilename), text);
-	} catch {
-	  case e : Exception => println("WARN: File " + text.getId() + " processing problem")
-	}
-	new edu.uwm.cs.mir.prototypes.feature.wikipedia.WikiPediaTextAdaptor(text.getId, textContent)
+      {
+        //TODO
+        //if (awsS3Config.isIs_s3_storage()) wikiPediaDataSetTextExtract.setAWSS3Config(awsS3Config)
+
+        var textContent = ""
+        try {
+          // filename = filename.substring(filename.lastIndexOf("/") + 1,
+          // filename.lastIndexOf("."));
+          textContent = XmlParserUtils.getTextFromXmlFileContent(text.getFeature, "text")
+          //FileUtils.writeStringToFile(new File(extractedTextFilename), text);
+        } catch {
+          case e: Exception => println("WARN: File " + text.getId() + " processing problem")
+        }
+        new edu.uwm.cs.mir.prototypes.feature.wikipedia.WikiPediaTextAdaptor(text.getId, textContent)
+      }
   }
 }

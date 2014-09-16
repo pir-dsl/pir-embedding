@@ -1,5 +1,7 @@
 package edu.uwm.cs.pir.examples
 
+import java.io.File
+
 import edu.uwm.cs.pir.domain.Loading
 import edu.uwm.cs.pir.domain.impl.lire.LireFeatures
 import edu.uwm.cs.pir.domain.impl.mallet.MalletTraining
@@ -10,37 +12,14 @@ import edu.uwm.cs.pir.domain.StringPath
 
 import edu.uwm.cs.pir.pipeline._
 
+import edu.uwm.cs.pir.utils.ExecutionConfigTransmedia
 import edu.uwm.cs.pir.utils.FileUtils
 import edu.uwm.cs.pir.utils.Constants._
 
-object TestTransmedia extends ExecutionConfig3 with Sequential with Example4 {
+object TestTransmedia extends ExecutionConfigTransmedia with Sequential with Example4 {
   def main(args: Array[String]): Unit = {
     query(SequentialVisitor)
   }
-}
-
-case class ExecutionConfig3() {
-  //CEDD feature env
-  var scaleWidth = SCALE_WIDTH
-  var scaleHeight = SCALE_HEIGHT
-  //Clustering env
-  var numberOfClusters = NUM_OF_CLUSTERS
-  var clusterFilename = CLUSTER_FIlE
-  //LDA env
-  var ldaModelFile = LDA_MODEL_FIlE
-  var descFile = EXTRACTED_TEXT_FILE_ROOT + "ALL_DESC.txt"
-  var stopwordFile = STOPWORDS_ROOT + "en.txt"
-  var numberOfTopics = NUM_OF_TOPICS
-  var alphaSum = ALPHA_SUM
-  var betaW = BETA_W
-  var numberOfSamplers = NUMBER_SAMPLER
-  var numberOfIterations = NUMBER_ITERATION
-  var encoding = DEFAULT_ENCODING
-  //LDA env
-  var gibbsSamplingIteration = GIBBS_SAMPLING_ITERATION
-  var gibbsSamplingThinning = GIBBS_SAMPLING_THINNING
-  var gibbsSamplingBurnin = GIBBS_SAMPLING_BURNIN
-  
 }
 
 trait Example4 extends Pipeline with FeatureLoadFunction with LireFeatures with InternalWikiFeatures with MalletTraining with StringPath {

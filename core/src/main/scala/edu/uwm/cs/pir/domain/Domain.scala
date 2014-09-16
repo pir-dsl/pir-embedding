@@ -220,11 +220,14 @@ import edu.uwm.cs.pir.Base
   }
 
   trait CCA extends Domain {
-    type CCA[X, Y]
-
-    def f_cca_train[X, Y]: TrnOp[(X, Y), CCA[X, Y]] // (List[(ID, (X, Y))]) => CCA[X, Y]
-    def f_cca_proj1[X, Y]: DPrjOp[X, List[ID], CCA[X, Y]] // (X, CCA[X, Y]) => List[ID]
-    def f_cca_proj2[X, Y]: DPrjOp[Y, List[ID], CCA[X, Y]] // (Y, CCA[X, Y]) => List[ID]
+    type CCA_Input_X
+    type CCA_Input_Y
+    type CCA
+    type CCAResult
+    
+    def f_cca_train: TrnOp[(CCA_Input_X, CCA_Input_Y), CCA] // (List[(ID, (X, Y))]) => CCA[X, Y]
+    def f_cca_proj1: DPrjOp[CCA_Input_X, List[(ID, CCAResult)], CCA] // (X, CCA[X, Y]) => List[ID]
+    def f_cca_proj2: DPrjOp[CCA_Input_Y, List[(ID, CCAResult)], CCA] // (Y, CCA[X, Y]) => List[ID]
   }
   
 //  trait Data[X]
