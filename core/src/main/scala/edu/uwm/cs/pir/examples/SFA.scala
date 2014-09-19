@@ -34,7 +34,7 @@ trait Example3 extends Pipeline with FeatureLoadFunction with SFAFunction with L
 
   def query(v: PipelineVisitor) {
 	  
-    val qImg = f_image(SAMPLE_IMAGES_ROOT + "test/query.jpg")
+    val qImg = f_image(SAMPLE_IMAGES_ROOT + "test/fa643cc80e0c08641d6b6dc26ceb2e2e.jpg")
 
     val img = load (f_image) (FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training", IMAGE))
     val x = img connect f_colorLayout connect f_distance(f_colorLayout(qImg)) sort f_order top 3

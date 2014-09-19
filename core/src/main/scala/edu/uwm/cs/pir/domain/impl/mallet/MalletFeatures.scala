@@ -58,10 +58,11 @@ import edu.uwm.cs.mir.prototypes.utils.Utils
 import net.semanticmetadata.lire.imageanalysis.sift.Feature
 
 import edu.uwm.cs.pir.domain.Domain
+import edu.uwm.cs.pir.domain.impl.SimpleAssociation
 import edu.uwm.cs.pir.domain.Training
 import scala.collection.JavaConverters._
 
-trait MalletTraining extends Training {
+trait MalletTraining extends Training with SimpleAssociation {
   var numberOfClusters: Int
   var clusterFilename: String
   var ldaModelFile: String
@@ -100,6 +101,12 @@ trait MalletTraining extends Training {
   type CCA_Input_Y = Histogram
   type CCA = CCAModel
   type CCAResult = String
+
+  val groundTruthMap = getGroundTruthMapping("all_txt_img_cat.list", "training", config)
+  groundTruthMap.asScala.foreach(elem => idMap += (elem._1.asInstanceOf[ID] -> elem._2.asInstanceOf[ID]))
+
+  //override def obtainAssociatedID[ID, Y]: (ID, Map[ID, Y]) => ID = ???
+  /**/
 
   def f_cluster_train: TrnOp[X, Cluster] = {
     s: List[(ID, X)] =>
@@ -248,7 +255,7 @@ trait MalletTraining extends Training {
           }
         }
         //TODO: See if we can avoid this
-        val id = "/ID.JPG"//x.asInstanceOf[String]
+        val id = "/ID.JPG" //x.asInstanceOf[String]
         val newId =
           if (!edu.uwm.cs.mir.prototypes.utils.OSChecker.isWindows) {
             id.substring(id.lastIndexOf("/") + 1, id.lastIndexOf("."))
@@ -270,8 +277,8 @@ trait MalletTraining extends Training {
           println("ldaModelFile = " + ldaModelFile)
           val file = new File(ldaModelFile)
           if (!((file).exists())) {
-        	  model = getLDAModel(descFile, instances)
-        	  Utils.serializeObject(model, config, ldaModelFile, false)
+            model = getLDAModel(descFile, instances)
+            Utils.serializeObject(model, config, ldaModelFile, false)
           }
         } catch {
           case e: Exception => throw new RuntimeException(e.getMessage)
@@ -411,16 +418,17 @@ trait MalletTraining extends Training {
         val ldaFeatureMap = new HashMap[String, Array[Double]]
 
         s.foreach(elem => {
-          val histogram = elem._2._1
-          val ldaFeature = elem._2._2
+          val histogram = elem._2._2
+          val ldaFeature = elem._2._1
+          val idString = elem._1.asInstanceOf[String]
           if (histogram != null) {
-            siftHistogramMap.put(histogram.getId, histogram.getFeature)
+            siftHistogramMap.put(idString.substring(idString.lastIndexOf(":") + 1, idString.length), histogram.getFeature)
           } else {
             siftHistogramMap.put("nullSIFTId", new Array[Double](imageFeatureSize))
           }
 
           if (ldaFeature != null) {
-            ldaFeatureMap.put(ldaFeature.getId, ldaFeature.getFeature)
+            ldaFeatureMap.put(idString.substring(0, idString.lastIndexOf(":")), ldaFeature.getFeature)
           } else {
             ldaFeatureMap.put("nullLDAId", new Array[Double](textFeatureSize))
           }
@@ -449,7 +457,7 @@ trait MalletTraining extends Training {
 
   @throws(classOf[IOException])
   private def constructXY2DArray(ldaFeatureMap: Map[String, Array[Double]], siftHistogramMap: Map[String, Array[Double]]): XY2DArrayContainer = {
-    val groundTruthMap = getGroundTruthMapping("all_txt_img_cat.list", "training", config)
+    //val groundTruthMap = getGroundTruthMapping("all_txt_img_cat.list", "training", config)
     if (siftHistogramMap.size != ldaFeatureMap.size) {
       println("The numbers of samples in X and Y are not equal, where siftHistogramMap size = " + siftHistogramMap.size + ", ldaFeatureMap size = " + ldaFeatureMap.size)
       var diffKeyArray: java.util.List[String] = new ArrayList[String]
@@ -476,7 +484,7 @@ trait MalletTraining extends Training {
       X(firstDimension) = ldaFeatureMap.get(key)
       // Y[firstDimension++] =
       // addHistogramPadding(siftHistogramMap.get(groundTruthMap.get(key)))
-      Y(firstDimension) = siftHistogramMap.get(groundTruthMap.get(key))
+      Y(firstDimension) = siftHistogramMap.get(groundTruthMap.get(key.substring(0, key.lastIndexOf(".xml"))) + ".jpg")
       firstDimension += 1
     }
     container.setX(X)
@@ -485,24 +493,24 @@ trait MalletTraining extends Training {
   }
 
   @throws(classOf[IOException])
-  private def getGroundTruthMapping( groundTruthFile: String,  datasetType: String,  config: AWSS3Config) : java.util.Map[String, String] = {
-	val groundTruthMap = new HashMap[String, String]
+  private def getGroundTruthMapping(groundTruthFile: String, datasetType: String, config: AWSS3Config): java.util.Map[String, String] = {
+    val groundTruthMap = new HashMap[String, String]
 
-	var lines : List[String] = null
-	//TODO: fix this
-//	if (config.isIs_s3_storage()) {
-//	    AmazonS3 amazonS3Client = AWSS3API.getAmazonS3Client(config);
-//	    lines = AWSS3API.getS3ObjectAsLines(config, "ground_truth/" + groundTruthFile, amazonS3Client, false);
-//	} else {
-	    lines = FileUtils.readLines(new File(SAMPLES_ROOT + "ground_truth/" + groundTruthFile)).asScala.toList
-//	}
-	for (line <- lines) {
-	    val items = line.split("\t")
-	    groundTruthMap.put(items(0), items(1))
-	}
-	groundTruthMap
+    var lines: java.util.List[String] = null
+    //TODO: fix this
+    //	if (config.isIs_s3_storage()) {
+    //	    AmazonS3 amazonS3Client = AWSS3API.getAmazonS3Client(config);
+    //	    lines = AWSS3API.getS3ObjectAsLines(config, "ground_truth/" + groundTruthFile, amazonS3Client, false);
+    //	} else {
+    lines = FileUtils.readLines(new File(SAMPLES_ROOT + "ground_truth/" + groundTruthFile))
+    //	}
+    for (line <- lines.asScala) {
+      val items = line.split("\t")
+      groundTruthMap.put(items(0), items(1))
     }
-  
+    groundTruthMap
+  }
+
   // groundTruthMap is a map from key text filename (no path, no extension) to value image filename
   private def getDiffKeyArray(siftHistogramMap: Map[String, Array[Double]], ldaFeatureMap: Map[String, Array[Double]], groundTruthMap: Map[String, String]): java.util.List[String] = {
     val diffKeyArray = new ArrayList[String]
@@ -523,20 +531,26 @@ trait MalletTraining extends Training {
   def f_cca_proj1: DPrjOp[CCA_Input_X, List[(ID, CCAResult)], CCA] = {
     (histogram, model) =>
       {
-        var result = new Result(null, false)
+        var result = new Result
         try {
-          result = queryAgainstCCA(true, histogram.getFeature, model)
+          result = queryAgainstCCA(false, histogram.getFeature, model)
         } catch {
           case e: Exception => throw new RuntimeException(e)
         }
         assignCategory(result.relevanceArray, "image", config)
         if (result.outputNeeded) {
           try {
-            outputRelevances(result.relevanceArray, "image")
+            val list = outputRelevances(result.relevanceArray, "image")
+            list.foreach(elem => println(elem._1 + ":" + elem._2))
+            list
           } catch {
             case e: IOException => throw new RuntimeException(e)
           }
-        } else List()
+        } else {
+          val list = List()
+          println(list)
+          list
+        }
       }
   }
 
@@ -557,7 +571,10 @@ trait MalletTraining extends Training {
       //}
       val longestCategoryStringLength = Utils.getLongestCategoryStringLength(categoryList)
       //TODO: The below may need to be modified for ID
-      relevanceArray.map(elem => (elem.getName.asInstanceOf[ID], elem.getRelevance + elem.toString(modality, longestCategoryStringLength))).toList
+      relevanceArray.map(elem =>
+        {
+          (elem.getName.asInstanceOf[ID], elem.toString(modality, longestCategoryStringLength))
+        }).toList
     } else List()
   }
 
@@ -625,7 +642,7 @@ trait MalletTraining extends Training {
     val existingVectors = if (isImageProj) ldaFeatureMap else siftFeatureMap
     val ccaResults = model.getCcaResults
     val relevanceArray = CCA.getCrossModalRelevances(queryVector, existingVectors, ccaResults, if (isImageProj) "Y" else "X")
-    Utils.assignCategory(relevanceArray, if (isImageProj) "text" else "image", config)
+    assignCategory(relevanceArray, if (isImageProj) "text" else "image", config)
     val result = new Result(relevanceArray, true)
     result
   }
@@ -633,9 +650,9 @@ trait MalletTraining extends Training {
   def f_cca_proj2: DPrjOp[CCA_Input_Y, List[(ID, CCAResult)], CCA] = {
     (ldaFeature, model) =>
       {
-        var result = new Result(null, false)
+        var result = new Result
         try {
-          result = queryAgainstCCA(false, ldaFeature.getFeature, model)
+          result = queryAgainstCCA(true, ldaFeature.getFeature, model)
         } catch {
           case e: Exception => throw new RuntimeException(e)
         }

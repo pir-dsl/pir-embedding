@@ -1,6 +1,7 @@
 package edu.uwm.cs.pir.domain
 
 import edu.uwm.cs.pir.domain._
+import edu.uwm.cs.pir.domain.impl.Association
 import net.semanticmetadata.lire.imageanalysis.LireFeature
 
 trait WikiFeatures extends WikiFeature
@@ -24,9 +25,15 @@ trait LocalFeatureLoadFunction extends Loading with SIFT with SurfFeature with M
 
 trait FeatureLoadFunction extends GlobalFeatureLoadFunction with LocalFeatureLoadFunction
 
-trait ImageQueryFunction[X] extends FeatureLoadFunction with Indexing
+trait ImageQueryFunction[X] extends FeatureLoadFunction with Indexing with Association {
+  //Just for compilation purpose, no need for the below function in ImageQuery
+  def obtainAssociatedID[ID, Y]: (ID, Map[ID, Y], Map[ID, ID]) => ID = ???
+}
 
-trait SFAFunction extends Similarity 
+trait SFAFunction extends Similarity with Association {
+  //Just for compilation purpose, no need for the below function in SFA
+  def obtainAssociatedID[ID, Y]: (ID, Map[ID, Y], Map[ID, ID]) => ID = ???
+}
 
 trait SimpleComposition extends Composition {
   type Compose[X, Y] = (X, Y)

@@ -225,7 +225,7 @@ import edu.uwm.cs.pir.Base
     type CCA
     type CCAResult
     
-    def f_cca_train: TrnOp[(CCA_Input_X, CCA_Input_Y), CCA] // (List[(ID, (X, Y))]) => CCA[X, Y]
+    def f_cca_train: TrnOp[(CCA_Input_X, CCA_Input_Y), CCA] // (List[(ID1, X), (ID2, Y))]) => CCA[X, Y] and ID 1-1 maps to ID2
     def f_cca_proj1: DPrjOp[CCA_Input_X, List[(ID, CCAResult)], CCA] // (X, CCA[X, Y]) => List[ID]
     def f_cca_proj2: DPrjOp[CCA_Input_Y, List[(ID, CCAResult)], CCA] // (Y, CCA[X, Y]) => List[ID]
   }

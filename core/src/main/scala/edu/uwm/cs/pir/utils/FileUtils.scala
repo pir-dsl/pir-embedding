@@ -24,6 +24,7 @@ object FileUtils {
         //This is for the case of query or such
         List(url)
       } else {
+        //TODO
         val ext =  if ("image".equals(modalityType)) "jpg" else "xml"
         //log("image url = " + url)
         if (awsS3Config.is_s3_storage) {

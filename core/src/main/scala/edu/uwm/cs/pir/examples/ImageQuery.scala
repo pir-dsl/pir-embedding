@@ -32,7 +32,7 @@ trait LireImageQuery extends Pipeline with SimpleComposition
 
   def imageQuery(v: PipelineVisitor) {
     val img = load (f_image) (FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training", IMAGE))
-    val qImg = load (f_image) (List(SAMPLE_IMAGES_ROOT + "test/query.jpg"))
+    val qImg = load (f_image) (List(SAMPLE_IMAGES_ROOT + "test/fa643cc80e0c08641d6b6dc26ceb2e2e.jpg"))
 
     val f = (x: Image) => f_cedd(x)
 

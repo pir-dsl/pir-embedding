@@ -30,7 +30,8 @@ trait Example4 extends Pipeline with FeatureLoadFunction with LireFeatures with 
   def query(v: PipelineVisitor) {
     val img = load(f_image)(FileUtils.pathToFileList(SAMPLE_IMAGES_ROOT + "training", IMAGE))
     val txt = load(f_text)(FileUtils.pathToFileList(SAMPLE_TEXT_ROOT + "training", TEXT))
-    val qImg = load(f_image)(List(SAMPLE_IMAGES_ROOT + "test/query.jpg"))
+    //val qImg = load(f_image)(List(SAMPLE_IMAGES_ROOT + "test/fa643cc80e0c08641d6b6dc26ceb2e2e.jpg"))
+    val qText = load(f_text)(List(SAMPLE_TEXT_ROOT + "test/7ec724230401f4a030b6a752ef5749db-2.7.xml"))
 
     val siftImg = img.connect(f_sift)
     val xmlText = txt.connect(f_wikiFeatureExtractor)
@@ -43,11 +44,12 @@ trait Example4 extends Pipeline with FeatureLoadFunction with LireFeatures with 
     val composed = topic.join(histogram) // ((x,y)=>(x,y))
     val cca = composed.train(f_cca_train)
 
-    val q = qImg.connect(f_sift).connect(cluster)(f_cluster_proj)
+    //val q = qImg.connect(f_sift).connect(cluster)(f_cluster_proj)
+    val q = qText.connect(f_wikiFeatureExtractor).connect(lda)(f_lda_proj)
 
-    val x = q.connect(cca)(f_cca_proj2)
+    //val x = q.connect(cca)(f_cca_proj2)
+    val x = q.connect(cca)(f_cca_proj1)
 
     x.accept(v)
-    println(x.cache.get)
   }
 }

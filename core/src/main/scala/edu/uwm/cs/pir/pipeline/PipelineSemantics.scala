@@ -1,6 +1,7 @@
 package edu.uwm.cs.pir.pipeline
 
 import scala.collection.parallel.immutable.ParSeq
+import edu.uwm.cs.pir.domain.impl.Association
 
 // Test implementation of pipeline visitor to print out string representation of the pipeline
 
@@ -80,7 +81,7 @@ trait Print extends Stage {
   }
 }
     
-trait Sequential extends Stage {
+trait Sequential extends Stage with Association {
   type Col[X] = List[FeatureDoc[X]]
   type Idx[X] = X
   type Trn[X] = X
@@ -154,13 +155,32 @@ trait Sequential extends Stage {
     def visit[X, Y, C](j: JoinPipe[X, Y, C]) 									= j.testAndSet( () => {
         		j.left.accept(this)
         		j.right.accept(this)
-        		val r = j.right.get.toMap[ID, Y]
-        		j.left.get.toMap[ID, X].foldLeft[Map[ID, C]](Map.empty)(
-        					(sofar, pair) => if (r.contains(pair._1))
-        									(sofar.+[C](pair._1, j.op(pair._2, r.get(pair._1).get)))
-        									else (sofar)).toList
+        		val list : Col[C] = constructListWithAssociatedID(j.left.get.toMap[ID, X], j.right.get.toMap[ID, Y], j.op)
+//        		val r = j.right.get.toMap[ID, Y]
+//        		val l = j.left.get.toMap[ID, X]
+//        		val list = l.foldLeft[Map[ID, C]](Map.empty)(
+//        					(sofar, pair) => if (r.contains(pair._1))
+//        									{
+//        										(sofar.+[C](pair._1, j.op(pair._2, r.get(pair._1).get)))
+//        									}
+//        									else {
+//        									  (sofar)
+//        									  }).toList
+        		list							
         	}
         )
+        
+    private def constructListWithAssociatedID[X, Y, C](left : Map[ID, X], right : Map[ID, Y], op : CpsOp[X,Y,C]) : Col[C] = {
+      if (left.size != right.size) throw new RuntimeException("The two inputs for join operation must have the same size!")
+      val list = left.map(
+      elem => {
+        val associatedID = obtainAssociatedID[ID, Y](elem._1, right, idMap)
+        (elem._1 + ":" + associatedID, op(elem._2, right.get(associatedID).get))   
+      	}
+      ).toList
+      list
+    }
+    
     def visit[X, Y, Z](p: ProjPipe[X, Y, Z]) 									= p.testAndSet( () => {
         		p.left.accept(this)
         		p.right.accept(this)
@@ -170,7 +190,7 @@ trait Sequential extends Stage {
   }
 }
 
-trait Parallel extends Stage {
+trait Parallel extends Stage with Association {
   type Col[X] = ParSeq[FeatureDoc[X]]
   type Idx[X] = X
   type Trn[X] = X

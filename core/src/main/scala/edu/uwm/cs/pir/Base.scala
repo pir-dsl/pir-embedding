@@ -21,5 +21,5 @@ trait Base {
   type IdxOp[X, I] 				= List[FeatureDoc[X]] => I							// indexing operator
     
   type TrnOp[X, M] 				= List[FeatureDoc[X]] => M							// training operator
-//  type TrnOp2[X, Y, M]			= (List[FeatureDoc[X]], List[FeatureDoc[Y]]) => M	// cross correlation training operator
+  //type TrnOp2[X, Y, M]			= (List[FeatureDoc[X]], List[FeatureDoc[Y]]) => M	// cross correlation training operator
 }
