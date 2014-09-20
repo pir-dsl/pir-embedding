@@ -16,9 +16,9 @@ import edu.uwm.cs.pir.utils.ExecutionConfigTransmedia
 import edu.uwm.cs.pir.utils.FileUtils
 import edu.uwm.cs.pir.utils.Constants._
 
-object TestTransmedia extends ExecutionConfigTransmedia with Sequential with Example4 {
+object TestTransmedia extends ExecutionConfigTransmedia with Parallel with Example4 {
   def main(args: Array[String]): Unit = {
-    query(SequentialVisitor)
+    query(ParallelVisitor)
   }
 }
 

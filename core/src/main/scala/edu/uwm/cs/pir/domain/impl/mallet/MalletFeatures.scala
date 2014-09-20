@@ -79,7 +79,7 @@ trait MalletTraining extends Training with SimpleAssociation {
   var gibbsSamplingThinning: Int
   var gibbsSamplingBurnin: Int
 
-  //The below temporary workaround needs to be fixed
+  //TODO: the below temporary workaround needs to be fixed
   val config = new AWSS3Config
 
   var imageFeatureSize: Int
@@ -104,9 +104,6 @@ trait MalletTraining extends Training with SimpleAssociation {
 
   val groundTruthMap = getGroundTruthMapping("all_txt_img_cat.list", "training", config)
   groundTruthMap.asScala.foreach(elem => idMap += (elem._1.asInstanceOf[ID] -> elem._2.asInstanceOf[ID]))
-
-  //override def obtainAssociatedID[ID, Y]: (ID, Map[ID, Y]) => ID = ???
-  /**/
 
   def f_cluster_train: TrnOp[X, Cluster] = {
     s: List[(ID, X)] =>

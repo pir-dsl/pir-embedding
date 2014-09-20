@@ -15,6 +15,8 @@ trait LocalFeatures extends SIFT with SurfFeature with MSER
 
 trait Training extends Clustering with LatentTopic with CCA
 
+trait StringID {type ID = String}
+
 trait StringPath { type Path = String }
 
 trait GlobalFeatureLoadFunction extends Loading with CEDD with ColorLayout with EdgeHistogram with FCTH with FuzzyColorHistogram 

@@ -1,43 +1,38 @@
 package edu.uwm.cs.pir.domain.impl.lire
 
+import java.awt.image.BufferedImage
+
+import org.apache.lucene.index.IndexWriter
+import org.apache.lucene.document.Document
+import org.apache.lucene.document.Field
+import java.util.TreeSet
+
+import net.semanticmetadata.lire.imageanalysis.mser.MSER
+import net.semanticmetadata.lire.utils.ImageUtils
+import net.semanticmetadata.lire.utils.LuceneUtils
+import net.semanticmetadata.lire.imageanalysis.LireFeature
+import net.semanticmetadata.lire.DocumentBuilder
+import net.semanticmetadata.lire.ImageSearchHits
+import net.semanticmetadata.lire.impl.SimpleImageSearchHits
+import net.semanticmetadata.lire.impl.SimpleResult
+import scala.collection.immutable.HashMap
+import scala.collection.JavaConverters._
+
 import edu.uwm.cs.pir.domain.Domain
 import edu.uwm.cs.pir.domain.GlobalFeatures
 import edu.uwm.cs.pir.domain.LocalFeatures
 import edu.uwm.cs.pir.domain.Indexing
 import edu.uwm.cs.pir.domain.Training
 import edu.uwm.cs.pir.domain.Lucene
-import java.awt.image.BufferedImage
+import edu.uwm.cs.mir.prototypes.query.utils.QueryUtils
 import edu.uwm.cs.mir.prototypes.feature.lire.utils.LireFeatureUtils
-import net.semanticmetadata.lire.imageanalysis.LireFeature
 import edu.uwm.cs.mir.prototypes.feature.utils.FeatureUtils
-import scala.collection.JavaConverters._
+import edu.uwm.cs.pir.domain.Similarity
 
 trait LireDomain extends Domain {
   type Image = edu.uwm.cs.mir.prototypes.feature.Image
   type Text = edu.uwm.cs.mir.prototypes.feature.Text
 }
-
-//TODO
-//trait LireLuceneGlobal extends Lucene {
-//  type Feature = LireFeature
-//  type Document = org.apache.lucene.document.Document
-//  def f_luceneDocTransformer = (feature: Feature) => {
-//    var doc = new org.apache.lucene.document.Document
-//    doc
-//  }
-//}
-
-import net.semanticmetadata.lire.utils.LuceneUtils
-import org.apache.lucene.index.IndexWriter
-import org.apache.lucene.document.Document
-import org.apache.lucene.document.Field
-import net.semanticmetadata.lire.DocumentBuilder
-import edu.uwm.cs.mir.prototypes.query.utils.QueryUtils
-import net.semanticmetadata.lire.ImageSearchHits
-import net.semanticmetadata.lire.impl.SimpleImageSearchHits
-import net.semanticmetadata.lire.impl.SimpleResult
-import java.util.TreeSet
-import scala.collection.immutable.HashMap
 
 trait LireIndexFunction[X] extends Indexing {
   var indexLocation: String
@@ -199,16 +194,19 @@ trait LireIndexFunction[X] extends Indexing {
   }
 }
 
-import edu.uwm.cs.pir.domain.Similarity
 trait LireGlobalSimilarity extends Similarity {
   type X = LireFeature
   type Distance = Float
-  def f_distance(y: X): PrjOp[X, Distance] = {
-    x =>
-      {
-        x.getDistance(y)
-      }
-  }
+  def f_distance: X => PrjOp[X, Distance] =
+    {
+      (y: X) =>
+        {
+          x =>
+            {
+              x.getDistance(y)
+            }
+        }
+    }
   def f_order: OdrOp[Distance] = (x, y) => {
     if (x._2 - y._2 > 0)
       true
@@ -357,9 +355,6 @@ trait LireGlobalFeatures extends GlobalFeatures with LireDomain {
     lireFeature
   }
 }
-
-import net.semanticmetadata.lire.imageanalysis.mser.MSER
-import net.semanticmetadata.lire.utils.ImageUtils
 
 trait LireLocalFeatures extends LocalFeatures with LireDomain {
   type SIFT = List[net.semanticmetadata.lire.imageanalysis.sift.Feature]

@@ -2,21 +2,17 @@ package edu.uwm.cs.pir.domain
 
 import edu.uwm.cs.pir.Base
 
-  // MIR domain types
-
+  /* MIR domain types */
   trait Domain extends Base {
     type Image// <: Feature[Image] // media types
     type Text// <: Feature[Text]
   }
 
-  // MIR domain functions
-
+  /* MIR domain functions */
   trait Similarity extends Domain {
     type X
     type Distance // point feature types
-    //def f_distance[X <: Comparable[X]]: X => PrjOp[X, Distance[X]] // (X, X) => Distance[X]
-    //def f_distance[X](y : X): X => PrjOp[X, Distance[X]] // (X, X) => Distance[X]
-    def f_distance (y : X) : PrjOp[X, Distance] // (X, X) => Distance[X]
+    def f_distance : X => PrjOp[X, Distance] // (X, X) => Distance[X]
     def f_order: OdrOp[Distance] // (X, X) => Boolean
   }
 
@@ -36,8 +32,7 @@ import edu.uwm.cs.pir.Base
     def f_wikiFeatureExtractor : PrjOp[Text, WikiFeatureExtractor]
   }
 
-  // global features
-  
+  /* global features */
   //Color Correlogram is an image of correlation statistics for color
   trait AutoColorCorrelogram extends Domain {
     type AutoColorCorrelogram
@@ -159,7 +154,7 @@ import edu.uwm.cs.pir.Base
     def f_tamura: PrjOp[Image, Tamura] // Image => Tamura
   }
   
-  // local features
+  /* local features */
 
   //Scale-Invariant Feature Transform Descriptor
   trait SIFT extends Domain {
@@ -194,29 +189,27 @@ import edu.uwm.cs.pir.Base
 
   // not strictly needed because of feature composition
   trait Indexing2 extends Domain {
-    type Index2[X, Y]
-    def f_index2[X, Y]: IdxOp[(X, Y), Index2[X, Y]] // (List[(ID, (X, Y))]) => Index2[X, Y]
-    def f_query2[X, Y]: DPrjOp[(X, Y), List[ID], Index2[X, Y]] // ((X, Y), Index2[X, Y]) => List[ID]
+    type Index2
+    def f_index2[X, Y]: IdxOp[(X, Y), Index2] // (List[(ID, (X, Y))]) => Index2
+    def f_query2[X, Y]: DPrjOp[(X, Y), List[ID], Index2] // ((X, Y), Index2) => List[ID]
   }
 
   // machine learning
-
   trait Clustering extends Domain {
     type X
     type Histogram
     type Cluster
 
-    def f_cluster_train: TrnOp[X, Cluster] // List[(ID, X)] => Cluster[X]
-    def f_cluster_proj: DPrjOp[X, Histogram, Cluster] // (X, Cluster[X]) => Histogram[X]  
+    def f_cluster_train: TrnOp[X, Cluster] // List[(ID, X)] => Cluster
+    def f_cluster_proj: DPrjOp[X, Histogram, Cluster] // (X, Cluster) => Histogram[X]  
   }
 
   trait LatentTopic extends Domain {
     type Distribution
     type Topic
-
     type Lda_Input
-    def f_lda_train: TrnOp[Lda_Input, Topic] // List[(ID, X)] => Topic[X]
-    def f_lda_proj: DPrjOp[Lda_Input, Distribution, Topic] // (X, Topic[X]) => Distribution[X]  
+    def f_lda_train: TrnOp[Lda_Input, Topic] // List[(ID, X)] => Topic
+    def f_lda_proj: DPrjOp[Lda_Input, Distribution, Topic] // (X, Topic) => Distribution 
   }
 
   trait CCA extends Domain {
@@ -225,9 +218,9 @@ import edu.uwm.cs.pir.Base
     type CCA
     type CCAResult
     
-    def f_cca_train: TrnOp[(CCA_Input_X, CCA_Input_Y), CCA] // (List[(ID1, X), (ID2, Y))]) => CCA[X, Y] and ID 1-1 maps to ID2
-    def f_cca_proj1: DPrjOp[CCA_Input_X, List[(ID, CCAResult)], CCA] // (X, CCA[X, Y]) => List[ID]
-    def f_cca_proj2: DPrjOp[CCA_Input_Y, List[(ID, CCAResult)], CCA] // (Y, CCA[X, Y]) => List[ID]
+    def f_cca_train: TrnOp[(CCA_Input_X, CCA_Input_Y), CCA] // (List[(ID, (X, Y))]) => CCA and ID 1-1 maps to ID2
+    def f_cca_proj1: DPrjOp[CCA_Input_X, List[(ID, CCAResult)], CCA] // (X, CCA) => List[ID]
+    def f_cca_proj2: DPrjOp[CCA_Input_Y, List[(ID, CCAResult)], CCA] // (Y, CCA) => List[ID]
   }
   
 //  trait Data[X]

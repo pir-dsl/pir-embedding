@@ -2,6 +2,11 @@ package edu.uwm.cs.pir.domain.impl
 
 import edu.uwm.cs.pir.domain.Domain
 
+/**
+ * This is for the use case when features from two different modalities need to be corrrelated with each other while
+ * their IDs are different. In this case, this association trait can be used to tie two IDs together
+ * See TransmediaQuery.scala for example
+ */
 trait Association extends Domain {
   var idMap : Map[ID, ID] = Map()
   def obtainAssociatedID[ID, Y]: (ID, Map[ID, Y], Map[ID, ID]) => ID
