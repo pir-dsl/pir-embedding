@@ -79,10 +79,12 @@ object AWSS3API {
       case ex: Exception => false
     }
     val result = (obj != null)
-    try {
-      obj.getObjectContent.close
-    } catch {
-      case ex: IOException => throw new RuntimeException(ex)
+    if (obj != null) {
+      try {
+        obj.getObjectContent.close
+      } catch {
+        case ex: IOException => throw new RuntimeException(ex)
+      }
     }
     result
   }
@@ -100,7 +102,6 @@ object AWSS3API {
   }
 
   def getNumberOfLinesOfS3Objects(config: AWSS3Config, id: String, amazonS3Client: AmazonS3, checkPersisted: Boolean) = getS3ObjectAsLines(config, id, amazonS3Client, checkPersisted).size
-  
 
   def putS3ObjectAsOutputStream(config: AWSS3Config, id: String, is: InputStream, amazonS3Client: AmazonS3, checkPersisted: Boolean) = {
     val request = new PutObjectRequest(if (checkPersisted) config.s3_persistence_bucket_name else config.bucket_name, id, is, new ObjectMetadata)

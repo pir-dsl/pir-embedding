@@ -60,6 +60,7 @@ import net.semanticmetadata.lire.imageanalysis.sift.Feature
 import edu.uwm.cs.pir.domain.Domain
 import edu.uwm.cs.pir.domain.impl.SimpleAssociation
 import edu.uwm.cs.pir.domain.Training
+import edu.uwm.cs.pir.utils.ResourceAPI
 import scala.collection.JavaConverters._
 
 trait MalletTraining extends Training with SimpleAssociation {
@@ -108,20 +109,10 @@ trait MalletTraining extends Training with SimpleAssociation {
   def f_cluster_train: TrnOp[X, Cluster] = {
     s: List[(ID, X)] =>
       {
-        var fileExists = false
-        //TODO: fix Aamazon data access
-        //	if (this.config.isIs_s3_storag) {
-        //	    AmazonS3 amazonS3Client = AWSS3API.getAmazonS3Client(config)
-        //	    fileExists = AWSS3API.checkObjectExists(config, clusterFilePathAndName, amazonS3Client, false)
-        //	} else {
-        val existingSerFile = new File(clusterFilename)
-        fileExists = existingSerFile.exists
-        //}
-
+        var fileExists = ResourceAPI.resourceExists(clusterFilename)
         if (fileExists) {
           println("Cluster File " + clusterFilename + " exists. Quit serialization")
         } else {
-
           // find the documents for building the vocabulary:
           val k = new net.semanticmetadata.lire.clustering.KMeans(numberOfClusters)
           // fill the KMeans object:

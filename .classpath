@@ -14,7 +14,7 @@
 	<classpathentry kind="lib" path="core/custom_lib/mallet.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/slf4j-api-1.7.2.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/slf4j-log4j12-1.6.2.jar"/>
-	<classpathentry kind="lib" path="lib_managed/jars/aws-java-sdk-1.4.7.jar"/>
+	<classpathentry kind="lib" path="lib_managed/jars/aws-java-sdk-1.4.7.jar" sourcepath="/Users/xiaobinghuang/.m2/repository/com/amazonaws/aws-java-sdk/1.4.7/aws-java-sdk-1.4.7-sources.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/cglib-nodep-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="lib_managed/jars/commons-io-2.4.jar"/>
