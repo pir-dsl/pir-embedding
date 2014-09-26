@@ -56,6 +56,7 @@ import edu.uwm.cs.mir.prototypes.proj.LocalTokenSequenceRemoveStopwords
 import edu.uwm.cs.mir.prototypes.utils.Utils
 
 import net.semanticmetadata.lire.imageanalysis.sift.Feature
+import net.semanticmetadata.lire.clustering.Cluster
 
 import edu.uwm.cs.pir.domain.Domain
 import edu.uwm.cs.pir.domain.impl.SimpleAssociation
@@ -162,23 +163,13 @@ trait MalletTraining extends Training with SimpleAssociation {
           // Serializing clusters to a file on the disk ...
           val clusters = k.getClusters
           try {
-            net.semanticmetadata.lire.clustering.Cluster.writeClusters(clusters, clusterFilename)
+            Cluster.writeClusters(clusters, clusterFilename)
           } catch {
             case e: IOException => throw new RuntimeException(e.getMessage)
           }
-
-          //TODO: fix this one
-          //	    boolean result
-          //	    AmazonS3 amazonS3Client = AWSS3API.getAmazonS3Client(config)
-          //	    if (config.isIs_s3_storage) {
-          //		if (AWSS3API.checkObjectExists(config, clusterFilePathAndName, amazonS3Client, false)) {
-          //		   result = AWSS3API.deleteS3ObjectAsOutputStream(config, clusterFilePathAndName, amazonS3Client, false)
-          //		   if (!result) throw new RuntimeException("Cannot delete cluster file: " + clusterFilePathAndName)
-          //		}
-          //		AWSS3API.putS3ObjectAsFile(config, clusterFilePathAndName, new File(clusterFilePathAndName), amazonS3Client, false)
-
+          ResourceAPI.resourceSave(clusterFilename)
           //May consider delete this file as it has been pushed to AWS S3
-          //new File(clusterFilePathAndName).delete
+          //new File(clusterFilename).delete
           //}
         }
         new edu.uwm.cs.mir.prototypes.model.ClusterModel(clusterFilename)
@@ -196,6 +187,7 @@ trait MalletTraining extends Training with SimpleAssociation {
     try {
       val filename = model.getClusterFilename
 
+      
       //TODO: Added this later
       //	    if (this.config.isIs_s3_storage) {
       //		AmazonS3 amazonS3Client = AWSS3API.getAmazonS3Client(config)

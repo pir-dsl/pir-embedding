@@ -113,7 +113,7 @@ object AWSS3API {
     true
   }
 
-  def putS3ObjectAsFile(config: AWSS3Config, id: String, file: File, amazonS3Client: AmazonS3, checkPersisted: Boolean) = {
+  def putS3ObjectAsFile(config: AWSS3Config, id: String, file: File, amazonS3Client: AmazonS3, checkPersisted: Boolean) : Boolean = {
     val request = new PutObjectRequest(if (checkPersisted) config.s3_persistence_bucket_name else config.bucket_name, id, file)
     try {
       amazonS3Client.putObject(request)
