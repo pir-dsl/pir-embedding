@@ -241,102 +241,102 @@ trait LireGlobalFeatures extends GlobalFeatures with LireDomain {
   type Tamura = net.semanticmetadata.lire.imageanalysis.Tamura
 
   def f_autoColorCorrelogram: PrjOp[Image, AutoColorCorrelogram] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new AutoColorCorrelogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.AutoColorCorrelogram]
   }
 
   def f_basicFeatures: PrjOp[Image, BasicFeatures] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new BasicFeatures).asInstanceOf[net.semanticmetadata.lire.imageanalysis.BasicFeatures]
   }
 
   def f_binaryPatternsPyramid: PrjOp[Image, BinaryPatternsPyramid] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new BinaryPatternsPyramid).asInstanceOf[net.semanticmetadata.lire.imageanalysis.BinaryPatternsPyramid]
   }
 
   def f_cedd: PrjOp[Image, CEDD] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new CEDD).asInstanceOf[net.semanticmetadata.lire.imageanalysis.CEDD]
   }
 
   def f_colorLayout: PrjOp[Image, ColorLayout] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new ColorLayout).asInstanceOf[net.semanticmetadata.lire.imageanalysis.ColorLayout]
   }
 
   def f_edgeHistogram: PrjOp[Image, EdgeHistogram] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new EdgeHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.EdgeHistogram]
   }
 
   def f_fcth: PrjOp[Image, FCTH] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new FCTH).asInstanceOf[net.semanticmetadata.lire.imageanalysis.FCTH]
   }
 
   def f_fuzzyColorHistogram: PrjOp[Image, FuzzyColorHistogram] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new FuzzyColorHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.FuzzyColorHistogram]
   }
 
   def f_fuzzyOpponentHistogram: PrjOp[Image, FuzzyOpponentHistogram] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new FuzzyOpponentHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.FuzzyOpponentHistogram]
   }
 
   def f_gabor: PrjOp[Image, Gabor] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new Gabor).asInstanceOf[net.semanticmetadata.lire.imageanalysis.Gabor]
   }
 
   def f_jcd: PrjOp[Image, JCD] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new JCD).asInstanceOf[net.semanticmetadata.lire.imageanalysis.JCD]
   }
 
   def f_jpegCoefficientHistogram: PrjOp[Image, JpegCoefficientHistogram] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new JpegCoefficientHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.JpegCoefficientHistogram]
   }
 
   def f_localBinaryPatterns: PrjOp[Image, LocalBinaryPatterns] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new LocalBinaryPatterns).asInstanceOf[net.semanticmetadata.lire.imageanalysis.LocalBinaryPatterns]
   }
 
   def f_luminanceLayout: PrjOp[Image, LuminanceLayout] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new LuminanceLayout).asInstanceOf[net.semanticmetadata.lire.imageanalysis.LuminanceLayout]
   }
 
   def f_opponentHistogram: PrjOp[Image, OpponentHistogram] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new OpponentHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.OpponentHistogram]
   }
 
   def f_phog: PrjOp[Image, PHOG] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new PHOG).asInstanceOf[net.semanticmetadata.lire.imageanalysis.PHOG]
   }
 
   def f_rotationInvariantLocalBinaryPatterns: PrjOp[Image, RotationInvariantLocalBinaryPatterns] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new RotationInvariantLocalBinaryPatterns).asInstanceOf[net.semanticmetadata.lire.imageanalysis.RotationInvariantLocalBinaryPatterns]
   }
 
   def f_scalableColor: PrjOp[Image, ScalableColor] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new ScalableColor).asInstanceOf[net.semanticmetadata.lire.imageanalysis.ScalableColor]
   }
 
   def f_simpleColorHistogram: PrjOp[Image, SimpleColorHistogram] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new SimpleColorHistogram).asInstanceOf[net.semanticmetadata.lire.imageanalysis.SimpleColorHistogram]
   }
 
   def f_tamura: PrjOp[Image, Tamura] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       processLireFeature(image, new Tamura).asInstanceOf[net.semanticmetadata.lire.imageanalysis.Tamura]
   }
 
@@ -362,7 +362,7 @@ trait LireLocalFeatures extends LocalFeatures with LireDomain {
   type MSER = List[net.semanticmetadata.lire.imageanalysis.mser.MSERFeature]
 
   override def f_sift: PrjOp[Image, SIFT] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       {
         val extractor = new net.semanticmetadata.lire.imageanalysis.sift.Extractor
         extractor.computeSiftFeatures(image.getFeature).asScala.toList
@@ -370,13 +370,13 @@ trait LireLocalFeatures extends LocalFeatures with LireDomain {
   }
 
   def f_surfFeature: PrjOp[Image, SurfFeature] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       val s = new com.stromberglabs.jopensurf.Surf(image.getFeature);
       s.getFreeOrientedInterestPoints.asScala.toList
   }
 
   def f_mser: PrjOp[Image, MSER] = {
-    (image: edu.uwm.cs.mir.prototypes.feature.Image) =>
+    (image: Image) =>
       {
         val extractor = new net.semanticmetadata.lire.imageanalysis.mser.MSER
         val greyImage: BufferedImage = convertImageToGrey(image.getFeature)

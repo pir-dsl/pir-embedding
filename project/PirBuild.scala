@@ -60,6 +60,7 @@ object PirBuild extends Build {
 	  "com.typesafe" % "config" % "1.0.2",
 	  "com.amazonaws" % "aws-java-sdk" % "1.4.7",
 	  "com.esotericsoftware.kryo" % "kryo" % "2.22"
+	  //"org.openimaj" % "core" % "1.3.1"
     ) 
   )
   
