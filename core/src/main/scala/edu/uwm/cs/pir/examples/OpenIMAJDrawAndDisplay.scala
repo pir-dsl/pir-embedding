@@ -26,26 +26,14 @@ object TestImageDrawAndDisplay extends Sequential with OpenIMAJImageDrawAndDispl
 }
 
 trait OpenIMAJImageDrawAndDisplay extends Pipeline with OpenIMAJFeatures with StringPath {
-  shape = new Ellipse(700f, 450f, 20f, 10f, 0f).asInstanceOf[Shape]
-  txt = "OpenIMAJ is"; 
-  x = 425; 
-  y = 300; font = HersheyFont.ASTROLOGY; size = 20; color = RGBColour.BLACK
-
   //This is a trivial example where p is not even used
   def f_image: LoadOp[Path, Image] = (p: Path) => ImageUtilities.readMBF(new java.io.File(p))
-
   def imageDrawAndDisplay(v: PipelineVisitor) {
     var img = load(f_image)(List(SAMPLE_IMAGES_ROOT + "test/sinaface.jpg"))
-    img = img connect f_drawShapeFilled
-//    shape = new Ellipse(650f, 425f, 25f, 12f, 0f).asInstanceOf[Shape]
-//    img = img connect f_drawShapeFilled
-//    shape = new Ellipse(600f, 380f, 30f, 15f, 0f).asInstanceOf[Shape]
-//    img = img connect f_drawShapeFilled
-//    shape = new Ellipse(500f, 300f, 100f, 70f, 0f).asInstanceOf[Shape]
-//    img = img connect f_drawShapeFilled
-    img = img connect f_drawText 
-    txt = "Awesome"
-    val display = img connect f_drawText connect f_display
+    img = img connect f_drawShapeFilled(new Ellipse(700f, 450f, 20f, 10f, 0f)) connect f_drawShapeFilled(new Ellipse(650f, 425f, 25f, 12f, 0f))
+    img = img connect f_drawShapeFilled(new Ellipse(600f, 380f, 30f, 15f, 0f)) connect f_drawShapeFilled(new Ellipse(500f, 300f, 100f, 70f, 0f))
+    img = img connect f_drawText("OpenIMAJ is", 425, 300, HersheyFont.ASTROLOGY, 20, RGBColour.BLACK) connect f_drawText("Awesome", 425, 330, HersheyFont.ASTROLOGY, 20, RGBColour.BLACK)
+    val display = img connect f_display
     display.accept(v)
   }
 }
