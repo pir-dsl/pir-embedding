@@ -38,50 +38,51 @@ trait OpenIMAJDomain extends Domain {
    import org.openimaj.image.colour.RGBColour
    import org.openimaj.image.typography.hershey.HersheyFont
    
-   then we see image.drawShapeFilled method takes a shape as parameter, hence we define that as well
-   var shape: Shape
-   we also see image.drawText method takes 5 parameters, we define
-   var txt: String; var x: Int; var y: Int; var font: HersheyFont; var size: Int; var color: Array[java.lang.Float]
-   accordingly
+   then we see image.drawShapeFilled method takes a shape as parameter, hence we define that as well;
+   also, we also see image.drawText method takes 5 parameters, we define that in the methods accordingly
    
    We achieve the below definition at the end
   
-   trait ImageDisplay extends Domain {
-  	var shape: Shape
-  	var txt: String; var x: Int; var y: Int; var font: HersheyFont; var size: Int; var color: Array[java.lang.Float]
+trait ImageDisplay extends Domain with Association {
+  def f_display: PrjOp[Image, JFrame] // Image => OpenIMAJImageDisplayResult
+  def f_drawShapeFilled(shape : Shape): PrjOp[Image, Image]
+  def f_drawText(txt: String, x: Int, y: Int, font: HersheyFont, size: Int, color: Array[java.lang.Float]): PrjOp[Image, Image]
 
-    //Feel free to add any other functions you need below
-  	def f_display: PrjOp[Image, JFrame] // Image => OpenIMAJImageDisplayResult
-  	def f_drawShapeFilled: PrjOp[Image, Image]
-  	def f_drawText: PrjOp[Image, Image]
-   }
+  //Just for compilation purpose, no need for the below function in ImageDisplay
+  def obtainAssociatedID[ID, Y]: (ID, Map[ID, Y], Map[ID, ID]) => ID = ???
+}
    
    then we can implement the above easily as below:
    
 trait OpenIMAJFeatures extends ImageDisplay with OpenIMAJDomain {
+
   def f_display: PrjOp[Image, JFrame] = {
-    (image: Image) => {
-      org.openimaj.image.DisplayUtilities.display(image)
-    }
-  }
-  def f_drawShapeFilled: PrjOp[Image, Image] = {
-    (image: Image) => { 
-      image.drawShapeFilled(shape, RGBColour.WHITE) 
-      image 
+    (image: Image) =>
+      {
+        org.openimaj.image.DisplayUtilities.display(image)
       }
   }
 
-  def f_drawText: PrjOp[Image, Image] = {
-    (image: Image) => { 
-      image.drawText(txt, x, y, font, size, color) 
-      image 
+  def f_drawShapeFilled(shape : Shape): PrjOp[Image, Image] = {
+    (image: Image) =>
+      {
+        image.drawShapeFilled(shape, RGBColour.WHITE)
+        image
+      }
+  }
+
+  def f_drawText(txt: String, x: Int, y: Int, font: HersheyFont, size: Int, color: Array[java.lang.Float]): PrjOp[Image, Image] = {
+    (image: Image) =>
+      {
+        image.drawText(txt, x, y, font, size, color)
+        image
       }
   }
 }
 
+With the above code (see edu.uwm.cs.pir.domain.impl.openimaj.OpenIMAJFeatures.scala for details), we are ready to write some test code to see 
+what we've got. Please refer edu.uwm.cs.pir.examples.OpenIMAJImageDrawAndDisplay.scala to see the code details. The testing code is very straightforward
+and it basically replicates the functionality that the openimaj image tutorial page demos.
 
 P.S. Depending on what functions you plan to integrate into PIR for openIMAJ, you can choose some of the dependencies here:
 http://www.openimaj.org/openimaj-core-libs/core-video/dependencies.html
-
-
-

@@ -12,7 +12,7 @@ trait ImageDisplay extends Domain with Association {
   def f_drawShapeFilled(shape : Shape): PrjOp[Image, Image]
   def f_drawText(txt: String, x: Int, y: Int, font: HersheyFont, size: Int, color: Array[java.lang.Float]): PrjOp[Image, Image]
 
-  //Just for compilation purpose, no need for the below function in ImageQuery
+  //Just for compilation purpose, no need for the below function in ImageDisplay
   def obtainAssociatedID[ID, Y]: (ID, Map[ID, Y], Map[ID, ID]) => ID = ???
 }
 
