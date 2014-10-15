@@ -29,10 +29,12 @@ trait OpenIMAJImageDrawAndDisplay extends Pipeline with OpenIMAJFeatures with St
   //This is a trivial example where p is not even used
   def f_image: LoadOp[Path, Image] = (p: Path) => ImageUtilities.readMBF(new java.io.File(p))
   def imageDrawAndDisplay(v: PipelineVisitor) {
+    val shapes = List(new Ellipse(700f, 450f, 20f, 10f, 0f), new Ellipse(650f, 425f, 25f, 12f, 0f), 
+    new Ellipse(600f, 380f, 30f, 15f, 0f), new Ellipse(500f, 300f, 100f, 70f, 0f))
+    val texts = List(("OpenIMAJ is", 425, 300, HersheyFont.ASTROLOGY, 20, RGBColour.BLACK), ("Awesome", 425, 330, HersheyFont.ASTROLOGY, 20, RGBColour.BLACK))    
     var img = load(f_image)(List(SAMPLE_IMAGES_ROOT + "test/sinaface.jpg"))
-    img = img connect f_drawShapeFilled(new Ellipse(700f, 450f, 20f, 10f, 0f)) connect f_drawShapeFilled(new Ellipse(650f, 425f, 25f, 12f, 0f))
-    img = img connect f_drawShapeFilled(new Ellipse(600f, 380f, 30f, 15f, 0f)) connect f_drawShapeFilled(new Ellipse(500f, 300f, 100f, 70f, 0f))
-    img = img connect f_drawText("OpenIMAJ is", 425, 300, HersheyFont.ASTROLOGY, 20, RGBColour.BLACK) connect f_drawText("Awesome", 425, 330, HersheyFont.ASTROLOGY, 20, RGBColour.BLACK)
+    shapes.map(shape => img = img connect f_drawShapeFilled(shape))
+    texts.map(text => img = img connect f_drawText(text._1, text._2, text._3, text._4, text._5, text._6))
     val display = img connect f_display
     display.accept(v)
   }
