@@ -10,6 +10,8 @@ import net.semanticmetadata.lire.utils.LuceneUtils
 
 import org.apache.lucene.document.Document
 import org.apache.lucene.document.Field
+import org.apache.lucene.document.StoredField
+import org.apache.lucene.document.TextField
 import org.apache.lucene.index.CorruptIndexException
 import org.apache.lucene.index.IndexWriter
 
@@ -51,11 +53,11 @@ object IndexUtils {
     }
     //In some rare scenario,  lireFeature is null and hence we just pass in a null object in this case
     if (lireFeature == null) {
-      doc.add(new Field(fieldName, Array[Byte]()))
+      doc.add(new StoredField(fieldName, Array[Byte]()))
     } else {
-      doc.add(new Field(fieldName, lireFeature.getByteArrayRepresentation()))
+      doc.add(new StoredField(fieldName, lireFeature.getByteArrayRepresentation()))
     }
-    if (id != null) doc.add(new Field(DocumentBuilder.FIELD_NAME_IDENTIFIER, id, Field.Store.YES, Field.Index.NOT_ANALYZED))
+    if (id != null) doc.add(new TextField(DocumentBuilder.FIELD_NAME_IDENTIFIER, id, Field.Store.YES))
     return doc
   }
 
