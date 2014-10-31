@@ -5,6 +5,8 @@ import java.awt.image.BufferedImage
 import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.document.Document
 import org.apache.lucene.document.Field
+import org.apache.lucene.document.TextField
+import org.apache.lucene.document.StoredField
 import java.util.TreeSet
 
 import net.semanticmetadata.lire.imageanalysis.mser.MSER
@@ -53,18 +55,18 @@ trait LireIndexFunction[X] extends Indexing {
           val lireFeature = elem._2
           val doc = new Document
           if (lireFeature == null) {
-            doc.add(new Field(lireFeature.getClass.getSimpleName(), Array[Byte]()));
+            doc.add(new StoredField(lireFeature.getClass.getSimpleName(), Array[Byte]()));
           } else {
             //TODO: check to see if we can avoid the below
             lireFeature match {
               case (x, y) => {
-                doc.add(new Field(x.getClass.getSimpleName(), x.asInstanceOf[LireFeature].getByteArrayRepresentation))
-                doc.add(new Field(y.getClass.getSimpleName(), y.asInstanceOf[LireFeature].getByteArrayRepresentation))
+                doc.add(new StoredField(x.getClass.getSimpleName(), x.asInstanceOf[LireFeature].getByteArrayRepresentation))
+                doc.add(new StoredField(y.getClass.getSimpleName(), y.asInstanceOf[LireFeature].getByteArrayRepresentation))
               }
-              case _ => doc.add(new Field(lireFeature.getClass.getSimpleName(), lireFeature.asInstanceOf[LireFeature].getByteArrayRepresentation))
+              case _ => doc.add(new StoredField(lireFeature.getClass.getSimpleName(), lireFeature.asInstanceOf[LireFeature].getByteArrayRepresentation))
             }
           }
-          if (id != null) doc.add(new Field(DocumentBuilder.FIELD_NAME_IDENTIFIER, id.toString, Field.Store.YES, Field.Index.NOT_ANALYZED));
+          if (id != null) doc.add(new TextField(DocumentBuilder.FIELD_NAME_IDENTIFIER, id.toString, Field.Store.YES));
           try {
             if (doc != null) {
               indexWriter.addDocument(doc);
@@ -178,10 +180,10 @@ trait LireIndexFunction[X] extends Indexing {
 
     val queryDoc = new Document
     if (queryFeature == null) {
-      queryDoc.add(new Field(queryFeature.getClass.getSimpleName(), Array[Byte]()));
+      queryDoc.add(new StoredField(queryFeature.getClass.getSimpleName(), Array[Byte]()));
     } else {
       //TODO: check to see if we can avoid the below
-      queryDoc.add(new Field(queryFeature.getClass.getSimpleName(), queryFeature.asInstanceOf[LireFeature].getByteArrayRepresentation))
+      queryDoc.add(new StoredField(queryFeature.getClass.getSimpleName(), queryFeature.asInstanceOf[LireFeature].getByteArrayRepresentation))
     }
 
     var imageSearchHits: ImageSearchHits = null
