@@ -108,10 +108,10 @@ import org.openimaj.image.feature.local.keypoints.Keypoint
 
 import collection.JavaConversions._
 import edu.uwm.cs.pir.DataType._
-trait LireToMapTranformer {
+object LireToMapTranformer {
   type LireSiftFeature = net.semanticmetadata.lire.imageanalysis.sift.Feature
 
-  def transformFromLireSiftFeature(lsf: LireSiftFeature): Map[String, Object] = {
+  def transformFromLireSiftFeature(lsf: LireSiftFeature): Map[String, t] = {
     val scale: BaseType = new BaseType(Right(Right(lsf.scale)))
     val orientation: BaseType = new BaseType(Right(Right(lsf.orientation)))
     val location: SequenceType = new SequenceType(lsf.location)
@@ -136,7 +136,7 @@ trait LireToMapTranformer {
   }
 }
 
-trait MapToOpenIMAJTranformer {
+object MapToOpenIMAJTranformer {
   type OpenIMAJKeyPoint = Keypoint
 
   //val engine = new org.openimaj.image.feature.local.engine.DoGSIFTEngine;	
@@ -163,28 +163,29 @@ trait MapToOpenIMAJTranformer {
 
     val location: Array[Float] = map("location") match {
       case s: SequenceType => s.value match {
-        case r : r_* => r.value.map(elem => elem.asInstanceOf[Float]).toArray
+        case r: r_* => r.value.map(elem => elem.asInstanceOf[Float]).toArray
         case _ => handleInvalidTypeException("location", "r_*")
       }
       case _ => handleGeneralTypeException("location")
     }
-    
+
     assert(location.length == 2)
-    
-    val descriptor : Array[Double] = map ("descriptor") match {
+
+    val descriptor: Array[Double] = map("descriptor") match {
       case s: SequenceType => s.value match {
-        case r : r_* => r.value.map(elem => elem.asInstanceOf[Double]).toArray
+        case r: r_* => r.value.map(elem => elem.asInstanceOf[Double]).toArray
         case _ => handleInvalidTypeException("descriptor", "r_*")
       }
       case _ => handleGeneralTypeException("location")
     }
-    
+
     val descriptorInBytes: Array[Byte] = doubleToByteArray(descriptor)
     new Keypoint(location(0), location(1), orientation, scale, descriptorInBytes)
   }
 
+  import net.semanticmetadata.lire.utils.SerializationUtils
   private def doubleToByteArray(in: Array[Double]): Array[Byte] = {
-    null
+    SerializationUtils.toByteArray(in)
   }
 
   private def handleInvalidTypeException(varName: String, correctType: String) = {
