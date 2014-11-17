@@ -63,5 +63,8 @@
 	<classpathentry kind="lib" path="core/custom_lib/image-feature-extraction-1.4-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/image-local-features-1.4-SNAPSHOT.jar" sourcepath="/openimaj-image/image-local-features/src/main/java"/>
 	<classpathentry kind="lib" path="core/custom_lib/core-feature-1.4-SNAPSHOT.jar" sourcepath="/core-feature/src"/>
+	<classpathentry kind="lib" path="core/custom_lib/machine-learning-1.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="core/custom_lib/nearest-neighbour-1.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="core/custom_lib/jal-20031117.jar"/>
 	<classpathentry kind="output" path="target"/>
 </classpath>

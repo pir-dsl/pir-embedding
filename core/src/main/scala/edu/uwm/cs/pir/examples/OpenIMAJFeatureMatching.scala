@@ -46,11 +46,14 @@ trait OpenIMAJFeatureMatching extends Pipeline with OpenIMAJFeatureMatchingWithL
     qSift.accept(v)
     tSift.accept(v)
     
-    val qSiftFeature =  qSift.get.asInstanceOf[List[FeatureDoc[_]]].map(pair => pair._2)
-    val tSiftFeature =  tSift.get.asInstanceOf[List[FeatureDoc[_]]].map(pair => pair._2)
+    var qSiftFeature =  qSift.get.asInstanceOf[List[FeatureDoc[List[Feature]]]].map(pair => pair._2)
+    var tSiftFeature =  tSift.get.asInstanceOf[List[FeatureDoc[List[Feature]]]].map(pair => pair._2)
     
-    val queryKeypoints = f_getKeypointList(null)
-    val targetKeypoints = f_getKeypointList(null)
+    val x = qSiftFeature(0)
+    val y = tSiftFeature(0)
+    
+    val queryKeypoints = f_getKeypointList(x)
+    val targetKeypoints = f_getKeypointList(y)
 
     val matches = f_getMatches(qMBFImg, tMBFImg, queryKeypoints, targetKeypoints)
 

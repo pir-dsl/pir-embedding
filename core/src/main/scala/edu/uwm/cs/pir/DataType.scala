@@ -126,12 +126,12 @@ object LireToMapTranformer {
   }
 
   implicit def double_to_r_*(doubleArr: Array[Double]): r = {
-    val lst = List.fromArray(doubleArr).map(i => new Left(new BaseType(Right(Right(i)))))
+    val lst = doubleArr.toList.map(i => new Left(new BaseType(new Right(Right(i)))))
     new r_*(lst)
   }
 
   implicit def float_to_r_*(floatArr: Array[Float]): r = {
-    val lst = List.fromArray(floatArr).map(i => new Left(new BaseType(Right(Right(i: Double)))))
+    val lst = floatArr.toList.map(i => new Left(new BaseType(new Right(Right(i: Double)))))
     new r_*(lst)
   }
 }
@@ -161,9 +161,18 @@ object MapToOpenIMAJTranformer {
       case _ => handleGeneralTypeException("orientation")
     }
 
+    val test = map("location")
+    
     val location: Array[Float] = map("location") match {
       case s: SequenceType => s.value match {
-        case r: r_* => r.value.map(elem => elem.asInstanceOf[Float]).toArray
+        case r: r_* => r.value.map(elem =>
+          elem match {
+            case b : BaseType => b.value match {
+              case Right(Right(d: Double)) => d.asInstanceOf[Float]
+              case _ => handleGeneralTypeException("location")
+            } 
+            case _ => handleGeneralTypeException("location")
+          }).toArray
         case _ => handleInvalidTypeException("location", "r_*")
       }
       case _ => handleGeneralTypeException("location")
@@ -173,7 +182,14 @@ object MapToOpenIMAJTranformer {
 
     val descriptor: Array[Double] = map("descriptor") match {
       case s: SequenceType => s.value match {
-        case r: r_* => r.value.map(elem => elem.asInstanceOf[Double]).toArray
+        case r: r_* => r.value.map(elem =>
+          elem match {
+            case b : BaseType => b.value match {
+              case Right(Right(d: Double)) => d
+              case _ => handleGeneralTypeException("location")
+            } 
+            case _ => handleGeneralTypeException("location")
+          }).toArray
         case _ => handleInvalidTypeException("descriptor", "r_*")
       }
       case _ => handleGeneralTypeException("location")
