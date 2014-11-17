@@ -1,4 +1,4 @@
-package edu.uwm.cs.pir.domain.impl.openimaj
+package edu.uwm.cs.pir.domain.impl.unidata
 
 import scala.collection.JavaConversions._
 
@@ -23,7 +23,7 @@ import org.openimaj.image.MBFImage
 import org.openimaj.image.colour.RGBColour
 import org.openimaj.image.DisplayUtilities
 
-trait OpenIMAJFeatureMatchingWithLirSift extends LireLocalFeatures {
+trait OpenIMAJFeatureMatchingWithLireSift extends LireLocalFeatures {
   //Just for compilation purpose, no need for the below function in ImageDisplay
   def obtainAssociatedID[ID, Y]: (ID, Map[ID, Y], Map[ID, ID]) => ID = ???
   
@@ -51,7 +51,7 @@ trait OpenIMAJFeatureMatchingWithLirSift extends LireLocalFeatures {
     matcher.findMatches(targetKeypoints)
   
     /*Below is basic matcher version from http://www.openimaj.org/tutorial/sift-and-feature-matching.html */
-    // MatchingUtilities.drawMatches(qMBFImg, tMBFImg, matcher.getMatches(), RGBColour.RED)
+    //val matches = MatchingUtilities.drawMatches(qMBFImg, tMBFImg, matcher.getMatches(), RGBColour.RED)
 
     /*Below is consistent matcher version from http://www.openimaj.org/tutorial/sift-and-feature-matching.html */
     val matches = MatchingUtilities.drawMatches(qMBFImg, tMBFImg, matcher.getMatches, RGBColour.RED)
