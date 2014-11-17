@@ -126,12 +126,12 @@ object LireToMapTranformer {
   }
 
   implicit def double_to_r_*(doubleArr: Array[Double]): r = {
-    val lst = doubleArr.toList.map(i => new Left(new BaseType(new Right(Right(i)))))
+    val lst = doubleArr.toList.map(i => new Left(new BaseType(new Right(new Right(i)))))
     new r_*(lst)
   }
 
   implicit def float_to_r_*(floatArr: Array[Float]): r = {
-    val lst = floatArr.toList.map(i => new Left(new BaseType(new Right(Right(i: Double)))))
+    val lst = floatArr.toList.map(i => new Left(new BaseType(new Right(new Right(i: Double)))))
     new r_*(lst)
   }
 }
@@ -161,8 +161,6 @@ object MapToOpenIMAJTranformer {
       case _ => handleGeneralTypeException("orientation")
     }
 
-    val test = map("location")
-    
     val location: Array[Float] = map("location") match {
       case s: SequenceType => s.value match {
         case r: r_* => r.value.map(elem =>
