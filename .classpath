@@ -8,7 +8,7 @@
 	<classpathentry kind="lib" path="core/custom_lib/dom4j-2.0.0-ALPHA-2.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/DSL_MIR-0.0.1-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/hadoop-core-1.0.4.jar"/>
-	<classpathentry kind="lib" path="core/custom_lib/lire.jar"/>
+	<classpathentry kind="lib" path="core/custom_lib/lire.jar" sourcepath="/Lire-0.9.4-beta_2/src/main/java"/>
 	<classpathentry kind="lib" path="core/custom_lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/mallet-deps.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/mallet.jar"/>
@@ -61,5 +61,8 @@
 	<classpathentry kind="lib" path="core/custom_lib/sun-jai_codec.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/BezierUtils-1.0.0.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/jama-1.0.2.jar"/>
+	<classpathentry kind="lib" path="core/custom_lib/image-feature-extraction-1.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="core/custom_lib/image-local-features-1.4-SNAPSHOT.jar" sourcepath="/openimaj-image/image-local-features/src/main/java"/>
+	<classpathentry kind="lib" path="core/custom_lib/core-feature-1.4-SNAPSHOT.jar" sourcepath="/core-feature/src"/>
 	<classpathentry kind="output" path="target"/>
 </classpath>
