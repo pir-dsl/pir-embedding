@@ -21,13 +21,8 @@ import edu.uwm.cs.pir.domain.impl.unidata.OpenIMAJFeatureMatchingWithLireSift
 
 object TestFeatureMatching extends Sequential with OpenIMAJFeatureMatching {
   def main(args: Array[String]): Unit = {
-    val tmpResult = featureMatching(SequentialVisitor)
+    val (qSift, tSift, qMBFImg, tMBFImg) = featureMatching(SequentialVisitor)
 
-    val qSift = tmpResult._1
-    val tSift = tmpResult._2
-    val qMBFImg = tmpResult._3
-    val tMBFImg = tmpResult._4
-    
     val qSiftFeature = (qSift.get.map(pair => pair._2))
     val tSiftFeature = (tSift.get.map(pair => pair._2))
 
