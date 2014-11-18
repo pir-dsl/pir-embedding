@@ -197,19 +197,25 @@ object MapToOpenIMAJTranformer {
     new Keypoint(location(0), location(1), orientation, scale, descriptorInBytes)
   }
 
-  import net.semanticmetadata.lire.utils.SerializationUtils
   private def doubleToByteArray(in: Array[Double]): Array[Byte] = {
-    var result = new Array[Byte](in.size * 4)
-    var i = 0
-    for (i <- 0 until result.length by 4) {
-      val tmp = SerializationUtils.toBytes(in(i / 4))
-      var j = 0
-      for (j <- 0 until 4 by 1) {
-        result(i + j) = tmp(j)
-      }
-    }
-    result
+    //A fairly ad-hoc way to amplify the value of original and then convert it to byte
+    //The precision is affected and thus the output keypoints is much less than directly output
+    //from OpenIMAJ Sift feature extractor
+    in.map(elem => (elem * 256).toByte)
   }
+//  import net.semanticmetadata.lire.utils.SerializationUtils
+//  private def doubleToByteArray(in: Array[Double]): Array[Byte] = {
+//    var result = new Array[Byte](in.size * 4)
+//    var i = 0
+//    for (i <- 0 until result.length by 4) {
+//      val tmp = SerializationUtils.toBytes(in(i / 4))
+//      var j = 0
+//      for (j <- 0 until 4 by 1) {
+//        result(i + j) = tmp(j)
+//      }
+//    }
+//    result
+//  }
 
   private def handleInvalidTypeException(varName: String, correctType: String) = {
     throw new RuntimeException(varName + " needs to be of " + correctType + " type")

@@ -7,6 +7,7 @@ import org.openimaj.image.ImageUtilities
 import org.openimaj.image.MBFImage
 import org.openimaj.feature.local.matcher.BasicMatcher
 import org.openimaj.image.feature.local.keypoints.Keypoint
+import org.openimaj.image.feature.local.engine.DoGSIFTEngine
 
 import edu.uwm.cs.pir.domain.StringPath
 
@@ -26,9 +27,9 @@ object TestFeatureMatching extends Sequential with OpenIMAJFeatureMatching {
     val qSiftFeature = (qSift.get.map(pair => pair._2))
     val tSiftFeature = (tSift.get.map(pair => pair._2))
 
-    //    val engine = new DoGSIFTEngine
-    //    val queryKeypoints = engine.findFeatures(qMBFImg.flatten)
-    //    val targetKeypoints = engine.findFeatures(tMBFImg.flatten)
+//        val engine = new DoGSIFTEngine
+//        val queryKeypoints = engine.findFeatures(qMBFImg.flatten)
+//        val targetKeypoints = engine.findFeatures(tMBFImg.flatten)
 
     val queryKeypoints = f_getKeypointList(qSiftFeature(0))
     val targetKeypoints = f_getKeypointList(tSiftFeature(0))
