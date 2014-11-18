@@ -21,11 +21,31 @@ import edu.uwm.cs.pir.domain.impl.unidata.OpenIMAJFeatureMatchingWithLireSift
 
 object TestFeatureMatching extends Sequential with OpenIMAJFeatureMatching {
   def main(args: Array[String]): Unit = {
-    featureMatching(SequentialVisitor)
+    val tmpResult = featureMatching(SequentialVisitor)
+
+    val qSift = tmpResult._1
+    val tSift = tmpResult._2
+    val qMBFImg = tmpResult._3
+    val tMBFImg = tmpResult._4
+    
+    val qSiftFeature = (qSift.get.map(pair => pair._2))
+    val tSiftFeature = (tSift.get.map(pair => pair._2))
+
+    //    val engine = new DoGSIFTEngine
+    //    val queryKeypoints = engine.findFeatures(qMBFImg.flatten)
+    //    val targetKeypoints = engine.findFeatures(tMBFImg.flatten)
+
+    val queryKeypoints = f_getKeypointList(qSiftFeature(0))
+    val targetKeypoints = f_getKeypointList(tSiftFeature(0))
+
+    val matches = f_getMatches(qMBFImg, tMBFImg, queryKeypoints, targetKeypoints)
+
+    f_displayMatchedMBFImage(matches)
   }
+
 }
 
-import org.openimaj.image.feature.local.engine.DoGSIFTEngine 
+import org.openimaj.image.feature.local.engine.DoGSIFTEngine
 trait OpenIMAJFeatureMatching extends Pipeline with OpenIMAJFeatureMatchingWithLireSift with StringPath {
   //This is a trivial example where p is not even used
   def f_image: LoadOp[Path, Image] = (p: Path) => new edu.uwm.cs.mir.prototypes.feature.Image(p)
@@ -44,19 +64,7 @@ trait OpenIMAJFeatureMatching extends Pipeline with OpenIMAJFeatureMatchingWithL
 
     qSift.accept(v)
     tSift.accept(v)
-    
-    val qSiftFeature =  (qSift.get.asInstanceOf[List[FeatureDoc[List[Feature]]]].map(pair => pair._2))
-    val tSiftFeature =  (tSift.get.asInstanceOf[List[FeatureDoc[List[Feature]]]].map(pair => pair._2))
-    
-//    val engine = new DoGSIFTEngine
-//    val queryKeypoints = engine.findFeatures(qMBFImg.flatten)
-//    val targetKeypoints = engine.findFeatures(tMBFImg.flatten)
 
-    val queryKeypoints = f_getKeypointList(qSiftFeature(0))
-    val targetKeypoints = f_getKeypointList(tSiftFeature(0))
-
-    val matches = f_getMatches(qMBFImg, tMBFImg, queryKeypoints, targetKeypoints)
-
-    f_displayMatchedMBFImage(matches)
+    (qSift, tSift, qMBFImg, tMBFImg)
   }
 }
