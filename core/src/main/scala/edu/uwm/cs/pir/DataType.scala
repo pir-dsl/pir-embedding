@@ -165,10 +165,10 @@ object MapToOpenIMAJTranformer {
       case s: SequenceType => s.value match {
         case r: r_* => r.value.map(elem =>
           elem match {
-            case b : BaseType => b.value match {
-              case Right(Right(d: Double)) => d.asInstanceOf[Float]
+            case b: BaseType => b.value match {
+              case Right(Right(d: Double)) => BigDecimal(d).setScale(1, BigDecimal.RoundingMode.HALF_UP).toFloat
               case _ => handleGeneralTypeException("location")
-            } 
+            }
             case _ => handleGeneralTypeException("location")
           }).toArray
         case _ => handleInvalidTypeException("location", "r_*")
@@ -182,10 +182,10 @@ object MapToOpenIMAJTranformer {
       case s: SequenceType => s.value match {
         case r: r_* => r.value.map(elem =>
           elem match {
-            case b : BaseType => b.value match {
+            case b: BaseType => b.value match {
               case Right(Right(d: Double)) => d
               case _ => handleGeneralTypeException("location")
-            } 
+            }
             case _ => handleGeneralTypeException("location")
           }).toArray
         case _ => handleInvalidTypeException("descriptor", "r_*")
@@ -199,7 +199,16 @@ object MapToOpenIMAJTranformer {
 
   import net.semanticmetadata.lire.utils.SerializationUtils
   private def doubleToByteArray(in: Array[Double]): Array[Byte] = {
-    SerializationUtils.toByteArray(in)
+    var result = new Array[Byte](in.size * 4)
+    var i = 0
+    for (i <- 0 until result.length by 4) {
+      val tmp = SerializationUtils.toBytes(in(i / 4))
+      var j = 0
+      for (j <- 0 until 4 by 1) {
+        result(i + j) = tmp(j)
+      }
+    }
+    result
   }
 
   private def handleInvalidTypeException(varName: String, correctType: String) = {
