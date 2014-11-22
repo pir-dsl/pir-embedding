@@ -2,8 +2,10 @@ package edu.uwm.cs.pir
 
 object DataType {
 
+  trait DataTypeRoot
+  
   // Basic types that can be used to represent types from heterogeneous systems
-  trait t
+  trait t extends DataTypeRoot
   sealed class SingletonType[T <: t](x: T) extends t {}
   sealed class ClosedRecord[T <: t](val seq: List[T] = List[T]()) extends t {}
   sealed class OpenRecord[T <: t](val value: T = null, var tail: OpenRecord[T]) extends t {
@@ -18,11 +20,21 @@ object DataType {
     }
   }
   sealed class SequenceType(val value: r) extends t {}
-  sealed class BaseType(val value: Either[Char, Either[Int, Double]]) extends t {}
-  sealed class SpecialType(value: Either[Null, Either[Nothing, Any]]) extends t {}
+  sealed class BaseType(val value: BaseRoot) extends t {}
+  sealed class SpecialType(value: SpecialRoot) extends t {}
   sealed class UnionType[X1 <: t, X2 <: t](val x1: X1, x2: X2) extends t {}
 
-  sealed class EmptyWord {
+  trait SpecialRoot
+  sealed class TNull (val value : Null) extends SpecialRoot
+  sealed class TNothing (val value : Nothing) extends SpecialRoot
+  sealed class TAny (val value : Any) extends SpecialRoot
+  
+  trait BaseRoot
+  sealed class TChar (val value : Char) extends BaseRoot
+  sealed class TInt (val value : Int) extends BaseRoot
+  sealed class TDouble (val value : Double) extends BaseRoot
+  
+  sealed class EmptyWord extends DataTypeRoot {
     val value = ""
   }
 
@@ -30,31 +42,31 @@ object DataType {
     def value: List[Object]
   }
 
-  sealed class r_self(v: Either[t, EmptyWord] = new Right(new EmptyWord)) extends r {
+  sealed class r_self(v: DataTypeRoot = new EmptyWord) extends r {
     override def value: List[Object] = {
       v match {
-        case Left(t) => List(t)
-        case Right(e) => List(e)
+        case t : t => List(t)
+        case e : EmptyWord => List(e)
       }
     }
   }
 
-  sealed class r_*(val values: List[Either[t, EmptyWord]]) extends r {
+  sealed class r_*(val values: List[DataTypeRoot]) extends r {
     override def value: List[Object] = {
       List() ++ values.map(value =>
         value match {
-          case Left(t) => t
-          case Right(e) => e
+          case t : t => t
+          case e : EmptyWord => e
         })
     }
   }
 
-  sealed class r_+(val first: r, val values: List[Either[t, EmptyWord]]) extends r {
+  sealed class r_+(val first: r, val values: List[DataTypeRoot]) extends r {
     override def value: List[Object] = {
       first.value ++ values.map(value =>
         value match {
-          case Left(t) => t
-          case Right(e) => e
+          case t : t => t
+          case e : EmptyWord => e
         })
     }
   }
@@ -80,11 +92,13 @@ object DataType {
   //    }
   //  }
 
-  type ^[T] = T => Nothing
+/** Not used yet, but like to keep it here
+ */  
+/*  type ^[T] = T => Nothing
   type v[T1, T2] = ^[^[T1] with ^[T2]]
   type ^^[T] = ^[^[T]]
   type or[X, T1, T2] = ^^[X] <:< (T1 v T2)
-  type |[T1, T2] = { type or[X] = ^^[X] <:< (T1 v T2) }
+  type |[T1, T2] = { type or[X] = ^^[X] <:< (T1 v T2) }*/
 
   //  trait Disj[T] {
   //    type or[S] = Disj[T with ^[S]]
@@ -112,8 +126,8 @@ object LireToMapTranformer {
   type LireSiftFeature = net.semanticmetadata.lire.imageanalysis.sift.Feature
 
   def transformFromLireSiftFeature(lsf: LireSiftFeature): Map[String, t] = {
-    val scale: BaseType = new BaseType(Right(Right(lsf.scale)))
-    val orientation: BaseType = new BaseType(Right(Right(lsf.orientation)))
+    val scale: BaseType = new BaseType(new TDouble(lsf.scale))
+    val orientation: BaseType = new BaseType(new TDouble(lsf.orientation))
     val location: SequenceType = new SequenceType(lsf.location)
     val descriptor: SequenceType = new SequenceType(lsf.descriptor)
 
@@ -126,37 +140,37 @@ object LireToMapTranformer {
   }
 
   implicit def double_to_r_*(doubleArr: Array[Double]): r = {
-    val lst = doubleArr.toList.map(i => new Left(new BaseType(new Right(new Right(i)))))
+    val lst = doubleArr.toList.map(i => new BaseType(new TDouble(i)))
     new r_*(lst)
   }
 
   implicit def float_to_r_*(floatArr: Array[Float]): r = {
-    val lst = floatArr.toList.map(i => new Left(new BaseType(new Right(new Right(i: Double)))))
+    val lst = floatArr.toList.map(i => new BaseType(new TDouble(i: Double)))
     new r_*(lst)
   }
 }
 
 object MapToOpenIMAJTranformer {
   type OpenIMAJKeyPoint = Keypoint
-
+ 
   //val engine = new org.openimaj.image.feature.local.engine.DoGSIFTEngine;	
   //val queryKeypoints : LocalFeatureList[Keypoint] = engine.findFeatures(query.flatten());
 
   def transformToOpenIMAJKeyPoint(map: Map[String, t]): OpenIMAJKeyPoint = {
     val scale: Float = map("scale") match {
       case b: BaseType => b.value match {
-        case Left(c) => handleInvalidTypeException("scale", "Float")
-        case Right(Left(i)) => handleInvalidTypeException("scale", "Float")
-        case Right(Right(d)) => d.floatValue
+        case char : TChar => handleInvalidTypeException("scale", "Float")
+        case i : TInt => handleInvalidTypeException("scale", "Float")
+        case d : TDouble => d.value.floatValue
       }
       case _ => handleGeneralTypeException("scale")
     }
 
     val orientation: Float = map("orientation") match {
       case b: BaseType => b.value match {
-        case Left(c) => handleInvalidTypeException("orientation", "Float")
-        case Right(Left(i)) => handleInvalidTypeException("orientation", "Float")
-        case Right(Right(d)) => d.floatValue
+        case char : TChar => handleInvalidTypeException("orientation", "Float")
+        case i : TInt => handleInvalidTypeException("orientation", "Float")
+        case d : TDouble => d.value.floatValue
       }
       case _ => handleGeneralTypeException("orientation")
     }
@@ -166,7 +180,7 @@ object MapToOpenIMAJTranformer {
         case r: r_* => r.value.map(elem =>
           elem match {
             case b: BaseType => b.value match {
-              case Right(Right(d: Double)) => BigDecimal(d).setScale(1, BigDecimal.RoundingMode.HALF_UP).toFloat
+              case d : TDouble => BigDecimal(d.value).setScale(1, BigDecimal.RoundingMode.HALF_UP).toFloat
               case _ => handleGeneralTypeException("location")
             }
             case _ => handleGeneralTypeException("location")
@@ -183,7 +197,7 @@ object MapToOpenIMAJTranformer {
         case r: r_* => r.value.map(elem =>
           elem match {
             case b: BaseType => b.value match {
-              case Right(Right(d: Double)) => d
+              case d : TDouble => d.value
               case _ => handleGeneralTypeException("location")
             }
             case _ => handleGeneralTypeException("location")
