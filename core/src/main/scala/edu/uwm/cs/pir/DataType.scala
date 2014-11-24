@@ -141,7 +141,7 @@ object LireToOpenIMAJTranformer {
   //val queryKeypoints : LocalFeatureList[Keypoint] = engine.findFeatures(query.flatten());
 
   def toOpenIMAJKeyPoint(m: M[Map[String, t]]): M[OpenIMAJKeyPoint] = {
-    var scale: Float = 0; var orientation: Float = 0
+    var scale: Float = -1; var orientation: Float = Float.MaxValue
     var location: Array[Float] = Array[Float](); var descriptor: Array[Double] = Array[Double]()
     bind(m, {
       (map: Map[String, t]) =>
@@ -189,6 +189,8 @@ object LireToOpenIMAJTranformer {
               }
             } else raise)
         }
+        assert(scale != -1)
+        assert(orientation != Float.MaxValue)
         assert(location.length == 2)
         pure(new Keypoint(location(0), location(1), orientation, scale, doubleToByteArray(descriptor)))
     })
