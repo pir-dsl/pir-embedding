@@ -3,8 +3,7 @@ package edu.uwm.cs.pir.domain.impl.unidata
 import scala.collection.JavaConversions._
 
 import edu.uwm.cs.pir.DataType
-import edu.uwm.cs.pir.LireToMapTranformer
-import edu.uwm.cs.pir.MapToOpenIMAJTranformer
+import edu.uwm.cs.pir.LireToOpenIMAJTranformer._
 import edu.uwm.cs.pir.domain.impl.lire.LireLocalFeatures
 
 import edu.uwm.cs.pir.utils.Constants._
@@ -28,9 +27,8 @@ trait OpenIMAJFeatureMatchingWithLireSift extends LireLocalFeatures {
   def obtainAssociatedID[ID, Y]: (ID, Map[ID, Y], Map[ID, ID]) => ID = ???
   
   def f_getKeypointList (in : List[Feature]) : LocalFeatureList[Keypoint] = {
-    val dataTypeRep = in.map(feature => LireToMapTranformer.transformFromLireSiftFeature(feature))
-    val lst = dataTypeRep.map(elem => MapToOpenIMAJTranformer.transformToOpenIMAJKeyPoint(elem))
-    new MemoryLocalFeatureList(lst.map(elem => elem.getA))
+    val lst = in.map(feature => toOpenIMAJKeyPoint(fromLireSiftFeature(feature))).map(elem => elem.getA)
+    new MemoryLocalFeatureList(lst)
   }
   
   def f_displayMatchedMBFImage(image : MBFImage) = {
