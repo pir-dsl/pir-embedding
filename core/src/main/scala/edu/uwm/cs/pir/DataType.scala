@@ -3,7 +3,7 @@ package edu.uwm.cs.pir
 object DataType {
 
   trait DataTypeRoot
-  
+
   // Basic types that can be used to represent types from heterogeneous systems
   trait t extends DataTypeRoot
   sealed class SingletonType[T <: t](x: T) extends t {}
@@ -25,15 +25,15 @@ object DataType {
   sealed class UnionType[X1 <: t, X2 <: t](val x1: X1, x2: X2) extends t {}
 
   trait SpecialRoot
-  sealed class TNull (val value : Null) extends SpecialRoot
-  sealed class TNothing (val value : Nothing) extends SpecialRoot
-  sealed class TAny (val value : Any) extends SpecialRoot
-  
+  sealed class TNull(val value: Null) extends SpecialRoot
+  sealed class TNothing(val value: Nothing) extends SpecialRoot
+  sealed class TAny(val value: Any) extends SpecialRoot
+
   trait BaseRoot
-  sealed class TChar (val value : Char) extends BaseRoot
-  sealed class TInt (val value : Int) extends BaseRoot
-  sealed class TDouble (val value : Double) extends BaseRoot
-  
+  sealed class TChar(val value: Char) extends BaseRoot
+  sealed class TInt(val value: Int) extends BaseRoot
+  sealed class TDouble(val value: Double) extends BaseRoot
+
   sealed class EmptyWord extends DataTypeRoot {
     val value = ""
   }
@@ -45,8 +45,8 @@ object DataType {
   sealed class r_self(v: DataTypeRoot = new EmptyWord) extends r {
     override def value: List[Object] = {
       v match {
-        case t : t => List(t)
-        case e : EmptyWord => List(e)
+        case t: t => List(t)
+        case e: EmptyWord => List(e)
       }
     }
   }
@@ -55,8 +55,8 @@ object DataType {
     override def value: List[Object] = {
       List() ++ values.map(value =>
         value match {
-          case t : t => t
-          case e : EmptyWord => e
+          case t: t => t
+          case e: EmptyWord => e
         })
     }
   }
@@ -65,8 +65,8 @@ object DataType {
     override def value: List[Object] = {
       first.value ++ values.map(value =>
         value match {
-          case t : t => t
-          case e : EmptyWord => e
+          case t: t => t
+          case e: EmptyWord => e
         })
     }
   }
@@ -77,46 +77,34 @@ object DataType {
     }
   }
 
-  /**
-   * We may not need the below two; i.e. optional and check type
-   */
-  //  sealed class r_or_r(val v1: r, val v2: r) extends r {
-  //    override def value: List[Object] = {
-  //      //TODO
-  //    }
-  //  }
-  //  
-  //  sealed class r_?(val undefined: Nothing, val value: r) extends r {
-  //    override def value: List[Object] = {
-  //      //TODO
-  //    }
-  //  }
-
-/** Not used yet, but like to keep it here
- */  
-/*  type ^[T] = T => Nothing
-  type v[T1, T2] = ^[^[T1] with ^[T2]]
-  type ^^[T] = ^[^[T]]
-  type or[X, T1, T2] = ^^[X] <:< (T1 v T2)
-  type |[T1, T2] = { type or[X] = ^^[X] <:< (T1 v T2) }*/
-
-  //  trait Disj[T] {
-  //    type or[S] = Disj[T with ^[S]]
-  //    type apply = ^[T]
-  //  }
-  //  type disj[T] = { type or[S] = Disj[^[T]]#or[S] }
-  //
-  //  ////////////////////////////////////////////////////
-
-  //  def let[A, B](x: A)(f: A => B): B = f(x)
-  ////////////////////////////////////////////////////
   def getName[T](t: T): String = {
     t.getClass.getSimpleName
   }
+
+  /*--------------Monad definition Begin--------------*/
+  type Exception = String
+  trait M[A] {
+    def getA: A
+  }
+  sealed case class Raise[A](e: Exception) extends M[A] {
+    override def getA: A = ???
+  }
+  sealed case class Return[A](val a: A) extends M[A] {
+    override def getA: A = a
+  }
+
+  def pure[A](a: A): M[A] = Return(a)
+  def bind[A, B](m: M[A], k: A => M[B]): M[B] = {
+    m match {
+      case Raise(e) => Raise(e)
+      case Return(a) => k(a)
+    }
+  }
+  def raise[A](e: String): M[A] = throw new RuntimeException("Exception") //Raise(e)
+  /*--------------Monad definition End--------------*/
 }
 
-//http://www.openimaj.org/tutorial/sift-and-feature-matching.html
-
+/*http://www.openimaj.org/tutorial/sift-and-feature-matching.html*/
 import org.openimaj.feature.local.list.LocalFeatureList
 import org.openimaj.image.feature.local.keypoints.Keypoint
 
@@ -125,18 +113,14 @@ import edu.uwm.cs.pir.DataType._
 object LireToMapTranformer {
   type LireSiftFeature = net.semanticmetadata.lire.imageanalysis.sift.Feature
 
-  def transformFromLireSiftFeature(lsf: LireSiftFeature): Map[String, t] = {
+  def transformFromLireSiftFeature(lsf: LireSiftFeature): M[Map[String, t]] = {
     val scale: BaseType = new BaseType(new TDouble(lsf.scale))
     val orientation: BaseType = new BaseType(new TDouble(lsf.orientation))
     val location: SequenceType = new SequenceType(lsf.location)
     val descriptor: SequenceType = new SequenceType(lsf.descriptor)
 
-    var map: Map[String, t] = Map(
-      "scale" -> scale,
-      "orientation" -> orientation,
-      "location" -> location,
-      "descriptor" -> descriptor)
-    map
+    var map: Map[String, t] = Map("scale" -> scale, "orientation" -> orientation, "location" -> location, "descriptor" -> descriptor)
+    pure(map)
   }
 
   implicit def double_to_r_*(doubleArr: Array[Double]): r = {
@@ -152,84 +136,85 @@ object LireToMapTranformer {
 
 object MapToOpenIMAJTranformer {
   type OpenIMAJKeyPoint = Keypoint
- 
+
   //val engine = new org.openimaj.image.feature.local.engine.DoGSIFTEngine;	
   //val queryKeypoints : LocalFeatureList[Keypoint] = engine.findFeatures(query.flatten());
 
-  def transformToOpenIMAJKeyPoint(map: Map[String, t]): OpenIMAJKeyPoint = {
-    val scale: Float = map("scale") match {
-      case b: BaseType => b.value match {
-        case char : TChar => handleInvalidTypeException("scale", "Float")
-        case i : TInt => handleInvalidTypeException("scale", "Float")
-        case d : TDouble => d.value.floatValue
-      }
-      case _ => handleGeneralTypeException("scale")
-    }
+  def transformToOpenIMAJKeyPoint(m: M[Map[String, t]]): M[OpenIMAJKeyPoint] = {
+    var scale: Float = 0
+    var orientation: Float = 0
+    var location: Array[Float] = Array[Float]()
+    var descriptor: Array[Double] = Array[Double]()
+    bind(m, {
+      (map: Map[String, t]) =>
+        {
+          map.foreach(elem =>
+            if ("scale" == elem._1) {
+              elem._2 match {
+                case b: BaseType => b.value match {
+                  case d: TDouble => scale = d.value.floatValue
+                  case _ => raise("scale")
+                }
+                case _ => raise("scale")
+              }
+            } else if ("orientation" == elem._1) {
+              elem._2 match {
+                case b: BaseType => b.value match {
+                  case d: TDouble => orientation = d.value.floatValue
+                  case _ => raise("orientation")
+                }
+                case _ => raise("orientation")
+              }
+            } else if ("location" == elem._1) {
+              elem._2 match {
+                case s: SequenceType => s.value match {
+                  case r: r_* => {
+                    val temp = r.value.map(elem =>
+                      elem match {
+                        case b: BaseType => b.value match {
+                          case d: TDouble => BigDecimal(d.value).setScale(1, BigDecimal.RoundingMode.HALF_UP).toFloat
+                          case _ => raise("location")
+                        }
+                        case _ => raise("location")
+                      })
+                    location = temp.map(elem => elem.asInstanceOf[Float]).toArray
+                  }
+                  case _ => raise("location")
+                }
+                case _ => raise("location")
+              }
+            } else if ("descriptor" == elem._1) {
+              val temp = elem._2 match {
+                case s: SequenceType => s.value match {
+                  case r: r_* => {
+                    val temp = r.value.map(elem =>
+                      elem match {
+                        case b: BaseType => b.value match {
+                          case d: TDouble => d.value
+                          case _ => raise("descriptor")
+                        }
+                        case _ => raise("descriptor")
+                      })
+                    descriptor = temp.map(elem => elem.asInstanceOf[Double]).toArray
+                  }
+                  case _ => raise("descriptor")
+                }
+                case _ => raise("descriptor")
+              }
+            } else raise("placeholder"))
+        }
+        assert(location.length == 2)
+        val descriptorInBytes: Array[Byte] = doubleToByteArray(descriptor)
+        pure(new Keypoint(location(0), location(1), orientation, scale, descriptorInBytes))
+    })
 
-    val orientation: Float = map("orientation") match {
-      case b: BaseType => b.value match {
-        case char : TChar => handleInvalidTypeException("orientation", "Float")
-        case i : TInt => handleInvalidTypeException("orientation", "Float")
-        case d : TDouble => d.value.floatValue
-      }
-      case _ => handleGeneralTypeException("orientation")
-    }
-
-    val location: Array[Float] = map("location") match {
-      case s: SequenceType => s.value match {
-        case r: r_* => r.value.map(elem =>
-          elem match {
-            case b: BaseType => b.value match {
-              case d : TDouble => BigDecimal(d.value).setScale(1, BigDecimal.RoundingMode.HALF_UP).toFloat
-              case _ => handleGeneralTypeException("location")
-            }
-            case _ => handleGeneralTypeException("location")
-          }).toArray
-        case _ => handleInvalidTypeException("location", "r_*")
-      }
-      case _ => handleGeneralTypeException("location")
-    }
-
-    assert(location.length == 2)
-
-    val descriptor: Array[Double] = map("descriptor") match {
-      case s: SequenceType => s.value match {
-        case r: r_* => r.value.map(elem =>
-          elem match {
-            case b: BaseType => b.value match {
-              case d : TDouble => d.value
-              case _ => handleGeneralTypeException("location")
-            }
-            case _ => handleGeneralTypeException("location")
-          }).toArray
-        case _ => handleInvalidTypeException("descriptor", "r_*")
-      }
-      case _ => handleGeneralTypeException("location")
-    }
-
-    val descriptorInBytes: Array[Byte] = doubleToByteArray(descriptor)
-    new Keypoint(location(0), location(1), orientation, scale, descriptorInBytes)
   }
 
   private def doubleToByteArray(in: Array[Double]): Array[Byte] = {
-    //A fairly ad-hoc way to amplify the value of original and then convert it to byte
-    //The precision is affected and thus the output keypoints is much less than directly output
-    //from OpenIMAJ Sift feature extractor
+    //A fairly ad-hoc way to amplify the value of original and then convert it to byte 
+    //and the # of keypoints generated are much less than that of OpenIMAJ Sift feature extractor
     in.map(elem => (elem * 256).toByte)
   }
-//  import net.semanticmetadata.lire.utils.SerializationUtils
-//  private def doubleToByteArray(in: Array[Double]): Array[Byte] = {
-//    var result = new Array[Byte](in.size * 4)
-//    var i = 0
-//    for (i <- 0 until result.length by 4) {
-//      val tmp = SerializationUtils.toBytes(in(i / 4))
-//      var j = 0
-//      for (j <- 0 until 4 by 1) {
-//        result(i + j) = tmp(j)
-//      }
-//    }
-//    result
-//  }
 
   private def handleInvalidTypeException(varName: String, correctType: String) = {
     throw new RuntimeException(varName + " needs to be of " + correctType + " type")
