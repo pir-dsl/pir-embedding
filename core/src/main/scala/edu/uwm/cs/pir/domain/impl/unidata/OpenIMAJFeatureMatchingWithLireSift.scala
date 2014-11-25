@@ -27,7 +27,7 @@ trait OpenIMAJFeatureMatchingWithLireSift extends LireLocalFeatures {
   def obtainAssociatedID[ID, Y]: (ID, Map[ID, Y], Map[ID, ID]) => ID = ???
   
   def f_getKeypointList (in : List[Feature]) : LocalFeatureList[Keypoint] = {
-    val lst = in.map(feature => toOpenIMAJKeyPoint(fromLireSiftFeature(feature))).map(elem => elem.getA)
+    val lst = in.map(feature => toOpenIMAJKeyPoint(fromLireSiftFeature(feature)))
     new MemoryLocalFeatureList(lst)
   }
   

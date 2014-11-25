@@ -111,17 +111,18 @@ object DataType {
   /*--------------Monad definition End--------------*/
 }
 
+sealed class SiftFeature(val scale: TDouble, val orientation: TDouble, val location: SequenceType, val descriptor: SequenceType)
+
 /*http://www.openimaj.org/tutorial/sift-and-feature-matching.html*/
 object LireToOpenIMAJTranformer {
   //Part one
   type LireSiftFeature = net.semanticmetadata.lire.imageanalysis.sift.Feature
 
-  def fromLireSiftFeature(lsf: LireSiftFeature): M[Map[String, t]] = {
+  def fromLireSiftFeature(lsf: LireSiftFeature): SiftFeature = {
     val scale = new TDouble(lsf.scale); val orientation = new TDouble(lsf.orientation)
     val location = new SequenceType(lsf.location); val descriptor = new SequenceType(lsf.descriptor)
 
-    var map: Map[String, t] = Map("scale" -> scale, "orientation" -> orientation, "location" -> location, "descriptor" -> descriptor)
-    pure(map)
+    new SiftFeature(scale, orientation, location, descriptor)
   }
 
   implicit def double_to_r_*(doubleArr: Array[Double]): r = {
@@ -140,49 +141,31 @@ object LireToOpenIMAJTranformer {
   //val engine = new org.openimaj.image.feature.local.engine.DoGSIFTEngine;	
   //val queryKeypoints : LocalFeatureList[Keypoint] = engine.findFeatures(query.flatten());
 
-  def toOpenIMAJKeyPoint(m: M[Map[String, t]]): M[OpenIMAJKeyPoint] = {
-    var scale: Float = -1; var orientation: Float = Float.MaxValue
-    var location: Array[Float] = Array[Float](); var descriptor: Array[Double] = Array[Double]()
-    bind(m, {
-      (map: Map[String, t]) =>
-        {
-          map.foreach(elem =>
-            {
-              elem._2 match {
-                case d: TDouble if ("scale" == elem._1) => scale = d.value.floatValue
-                case d: TDouble if ("orientation" == elem._1) => orientation = d.value.floatValue
-                case s: SequenceType => s.value match {
-                  case r: r_+ => {
-                    val temp = r.value.map(elem =>
-                      elem match {
-                        case d: TDouble => BigDecimal(d.value).setScale(1, BigDecimal.RoundingMode.HALF_UP).toFloat
-                        case _ => raiseSpecific("location", "Float")
-                      })
-                    location = temp.map(elem => elem.asInstanceOf[Float]).toArray
-                  }
-                  case r: r_* => {
-                    val temp = r.value.map(elem =>
-                      elem match {
-                        case d: TDouble => d.value
-                        case _ => raiseSpecific("descriptor", "Double")
-                      })
-                    descriptor = temp.map(elem => elem.asInstanceOf[Double]).toArray
-                  }
-                  case _ if ("location" == elem._1) => raiseSpecific(elem._1, "r_+")
-                  case _ if ("descriptor" == elem._1) => raiseSpecific(elem._1, "r_*")
-                  case _ => raise
-                }
-                case _ if (("scale" == elem._1) || ("orientation" == elem._1)) => raiseSpecific(elem._1, "Float")
-                case _ => raise
-              }
-            })
-          assert(scale != -1)
-          assert(orientation != Float.MaxValue)
-          assert(location.length == 2)
-          pure(new Keypoint(location(0), location(1), orientation, scale, doubleToByteArray(descriptor)))
-        }
-    })
+  def toOpenIMAJKeyPoint(siftFeature: SiftFeature): OpenIMAJKeyPoint = {
+    val scale: Float = siftFeature.scale.value.floatValue
+    val orientation: Float = siftFeature.orientation.value.floatValue
+    val location: Array[Float] = siftFeature.location.value match {
+      case r: r_+ => {
+        r.value.map(elem =>
+          elem match {
+            case d: TDouble => BigDecimal(d.value).setScale(1, BigDecimal.RoundingMode.HALF_UP).toFloat
+            case _ => throw new RuntimeException("location" + " needs to be of " + "Float" + " type")
+          })
+      }.toArray[Float]
+      case _ => throw new RuntimeException("location" + " needs to be of " + "r_+" + " type")
+    }
 
+    val descriptor: Array[Double] = siftFeature.descriptor.value match {
+      case r: r_* => {
+        r.value.map(elem =>
+          elem match {
+            case d: TDouble => d.value
+            case _ => throw new RuntimeException("descriptor" + " needs to be of " + "Double" + " type")
+          }).toArray[Double]
+      }
+      case _ => throw new RuntimeException("descriptor" + " needs to be of " + "r_*" + " type")
+    }
+    new Keypoint(location(0), location(1), orientation, scale, doubleToByteArray(descriptor))
   }
 
   private def doubleToByteArray(in: Array[Double]): Array[Byte] = {
