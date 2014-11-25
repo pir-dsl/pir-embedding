@@ -147,18 +147,10 @@ object LireToOpenIMAJTranformer {
       (map: Map[String, t]) =>
         {
           map.foreach(elem =>
-            if ("scale" == elem._1) {
+            {
               elem._2 match {
-                case d: TDouble => scale = d.value.floatValue
-                case _ => raiseSpecific("scale", "Float")
-              }
-            } else if ("orientation" == elem._1) {
-              elem._2 match {
-                case d: TDouble => orientation = d.value.floatValue
-                case _ => raiseSpecific("orientation", "Float")
-              }
-            } else if ("location" == elem._1) {
-              elem._2 match {
+                case d: TDouble if ("scale" == elem._1) => scale = d.value.floatValue
+                case d: TDouble if ("orientation" == elem._1) => orientation = d.value.floatValue
                 case s: SequenceType => s.value match {
                   case r: r_+ => {
                     val temp = r.value.map(elem =>
@@ -168,13 +160,6 @@ object LireToOpenIMAJTranformer {
                       })
                     location = temp.map(elem => elem.asInstanceOf[Float]).toArray
                   }
-                  case _ => raiseSpecific("location", "r_+")
-                }
-                case _ => raiseGeneral("location")
-              }
-            } else if ("descriptor" == elem._1) {
-              val temp = elem._2 match {
-                case s: SequenceType => s.value match {
                   case r: r_* => {
                     val temp = r.value.map(elem =>
                       elem match {
@@ -183,16 +168,19 @@ object LireToOpenIMAJTranformer {
                       })
                     descriptor = temp.map(elem => elem.asInstanceOf[Double]).toArray
                   }
-                  case _ => raiseSpecific("descriptor", "r_*")
+                  case _ if ("location" == elem._1) => raiseSpecific(elem._1, "r_+")
+                  case _ if ("descriptor" == elem._1) => raiseSpecific(elem._1, "r_*")
+                  case _ => raise
                 }
-                case _ => raiseGeneral("descriptor")
+                case _ if (("scale" == elem._1) || ("orientation" == elem._1)) => raiseSpecific(elem._1, "Float")
+                case _ => raise
               }
-            } else raise)
+            })
+          assert(scale != -1)
+          assert(orientation != Float.MaxValue)
+          assert(location.length == 2)
+          pure(new Keypoint(location(0), location(1), orientation, scale, doubleToByteArray(descriptor)))
         }
-        assert(scale != -1)
-        assert(orientation != Float.MaxValue)
-        assert(location.length == 2)
-        pure(new Keypoint(location(0), location(1), orientation, scale, doubleToByteArray(descriptor)))
     })
 
   }
