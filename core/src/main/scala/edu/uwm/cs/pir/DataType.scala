@@ -144,27 +144,18 @@ object LireToOpenIMAJTranformer {
   def toOpenIMAJKeyPoint(siftFeature: SiftFeature): OpenIMAJKeyPoint = {
     val scale: Float = siftFeature.scale.value.floatValue
     val orientation: Float = siftFeature.orientation.value.floatValue
-    val location: Array[Float] = siftFeature.location.value match {
-      case r: r_+ => {
-        r.value.map(elem =>
-          elem match {
-            case d: TDouble => BigDecimal(d.value).setScale(1, BigDecimal.RoundingMode.HALF_UP).toFloat
-            case _ => throw new RuntimeException("location" + " needs to be of " + "Float" + " type")
-          })
-      }.toArray[Float]
-      case _ => throw new RuntimeException("location" + " needs to be of " + "r_+" + " type")
-    }
+    val location: Array[Float] = siftFeature.location.value.asInstanceOf[r_+].value.map(
+      elem =>
+        {
+          BigDecimal(elem.asInstanceOf[TDouble].value).setScale(1, BigDecimal.RoundingMode.HALF_UP).toFloat
+        }).toArray
 
-    val descriptor: Array[Double] = siftFeature.descriptor.value match {
-      case r: r_* => {
-        r.value.map(elem =>
-          elem match {
-            case d: TDouble => d.value
-            case _ => throw new RuntimeException("descriptor" + " needs to be of " + "Double" + " type")
-          }).toArray[Double]
-      }
-      case _ => throw new RuntimeException("descriptor" + " needs to be of " + "r_*" + " type")
-    }
+    val descriptor: Array[Double] = siftFeature.descriptor.value.asInstanceOf[r_*].value.map(
+      elem =>
+        {
+          elem.asInstanceOf[TDouble].value
+        }).toArray
+
     new Keypoint(location(0), location(1), orientation, scale, doubleToByteArray(descriptor))
   }
 
