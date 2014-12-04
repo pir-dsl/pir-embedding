@@ -28,7 +28,7 @@ trait OpenIMAJFeatureMatchingWithLireSift extends LireLocalFeatures {
   
   def f_getKeypointList (in : List[Feature]) : LocalFeatureList[Keypoint] = {
     val lst = in.map(feature => toOpenIMAJKeyPoint(fromLireSiftFeature(feature)))
-    new MemoryLocalFeatureList(lst)
+    new MemoryLocalFeatureList(lst.map(elem => elem.getA))
   }
   
   def f_displayMatchedMBFImage(image : MBFImage) = {
