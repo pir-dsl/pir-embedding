@@ -44,11 +44,11 @@ object DataType {
   }
 
   trait r {
-    def value: List[Object]
+    def value: List[DataTypeRoot]
   }
 
   sealed class r_self(v: DataTypeRoot = new EmptyWord) extends r {
-    override def value: List[Object] = {
+    override def value: List[DataTypeRoot] = {
       v match {
         case t: t => List(t)
         case e: EmptyWord => List(e)
@@ -57,7 +57,7 @@ object DataType {
   }
 
   sealed class r_*(val values: List[DataTypeRoot]) extends r {
-    override def value: List[Object] = {
+    override def value: List[DataTypeRoot] = {
       List() ++ values.map(value =>
         value match {
           case t: t => t
@@ -67,7 +67,7 @@ object DataType {
   }
 
   sealed class r_+(val first: DataTypeRoot, val values: List[DataTypeRoot]) extends r {
-    override def value: List[Object] = {
+    override def value: List[DataTypeRoot] = {
       List(first) ++ values.map(value =>
         value match {
           case t: t => t
@@ -77,7 +77,7 @@ object DataType {
   }
 
   sealed class rr(val left: r, val right: r) extends r {
-    override def value: List[Object] = {
+    override def value: List[DataTypeRoot] = {
       left.value ++ right.value
     }
   }
@@ -111,17 +111,22 @@ object DataType {
   /*--------------Monad definition End--------------*/
 }
 
+import scala.reflect.runtime.universe._
+import scala.collection.mutable.Queue
+sealed class PirFeature(val map: Map[String, t], val types: Queue[Type])
+
 /*http://www.openimaj.org/tutorial/sift-and-feature-matching.html*/
 object LireToOpenIMAJTranformer {
   //Part one
   type LireSiftFeature = net.semanticmetadata.lire.imageanalysis.sift.Feature
 
-  def fromLireSiftFeature(lsf: LireSiftFeature): M[Map[String, t]] = {
+  def fromLireSiftFeature(lsf: LireSiftFeature): M[PirFeature] = {
     val scale = new TDouble(lsf.scale); val orientation = new TDouble(lsf.orientation)
-    val location = new SequenceType(lsf.location); val descriptor = new SequenceType(lsf.descriptor)
+    val location_x = new TDouble(lsf.location(0)); val location_y = new TDouble(lsf.location(1));
+    val descriptor = new SequenceType(lsf.descriptor)
 
-    var map: Map[String, t] = Map("scale" -> scale, "orientation" -> orientation, "location" -> location, "descriptor" -> descriptor)
-    pure(map)
+    val map: Map[String, t] = Map("scale" -> scale, "orientation" -> orientation, "location_x" -> location_x, "location_y" -> location_y, "descriptor" -> descriptor)
+    pure(new PirFeature(map, Queue(typeOf[LireSiftFeature])))
   }
 
   implicit def double_to_r_*(doubleArr: Array[Double]): r = {
@@ -140,26 +145,32 @@ object LireToOpenIMAJTranformer {
   //val engine = new org.openimaj.image.feature.local.engine.DoGSIFTEngine;	
   //val queryKeypoints : LocalFeatureList[Keypoint] = engine.findFeatures(query.flatten());
 
-  def toOpenIMAJKeyPoint(m: M[Map[String, t]]): M[OpenIMAJKeyPoint] = {
+  def toOpenIMAJKeyPoint(m: M[PirFeature]): M[OpenIMAJKeyPoint] = {
     var scale: Float = -1; var orientation: Float = Float.MaxValue
-    var location: Array[Float] = Array[Float](); var descriptor: Array[Double] = Array[Double]()
+    var location: Array[Float] = new Array[Float](2); var descriptor: Array[Double] = Array[Double]()
     bind(m, {
-      (map: Map[String, t]) =>
+      (pirFeature: PirFeature) =>
         {
-          map.foreach(elem =>
+          typeCheck(pirFeature, getRules("OpenIMAJ", typeTag[Keypoint]))
+          pirFeature.map.foreach(elem =>
             {
               elem._2 match {
                 case d: TDouble if ("scale" == elem._1) => scale = d.value.floatValue
                 case d: TDouble if ("orientation" == elem._1) => orientation = d.value.floatValue
+                case d: TDouble if ("location_x" == elem._1) => location(0) = d.value.floatValue
+                case d: TDouble if ("location_y" == elem._1) => {
+                  val x = d.value.floatValue
+                  location(1) = d.value.floatValue
+                }
                 case s: SequenceType => s.value match {
-                  case r: r_+ => {
-                    val temp = r.value.map(elem =>
-                      elem match {
-                        case d: TDouble => BigDecimal(d.value).setScale(1, BigDecimal.RoundingMode.HALF_UP).toFloat
-                        case _ => raiseSpecific("location", "Float")
-                      })
-                    location = temp.map(elem => elem.asInstanceOf[Float]).toArray
-                  }
+                  //                  case r: r_+ => {
+                  //                    val temp = r.value.map(elem =>
+                  //                      elem match {
+                  //                        case d: TDouble => BigDecimal(d.value).setScale(1, BigDecimal.RoundingMode.HALF_UP).toFloat
+                  //                        case _ => raiseSpecific("location", "Float")
+                  //                      })
+                  //                    location = temp.map(elem => elem.asInstanceOf[Float]).toArray
+                  //                  }
                   case r: r_* => {
                     val temp = r.value.map(elem =>
                       elem match {
@@ -178,11 +189,52 @@ object LireToOpenIMAJTranformer {
             })
           assert(scale != -1)
           assert(orientation != Float.MaxValue)
-          assert(location.length == 2)
           pure(new Keypoint(location(0), location(1), orientation, scale, doubleToByteArray(descriptor)))
         }
     })
+  }
 
+  private def getTypeTag[T: TypeTag](obj: T) = typeTag[T]
+
+  private def getRules[T](system: String, tpe: TypeTag[T]): Map[String, t => Boolean] = {
+    var map: Map[String, t => Boolean] = Map()
+    if ("OpenIMAJ" == system) {
+      val decls = tpe.tpe.declarations
+      decls.map(decl => {
+        if (decl.isTerm) {
+          val term = decl.asTerm
+          if (term.isVar) {
+            //println("var : " + term.name + ", type: " + term.typeSignature)
+            term.typeSignature match {
+              case t if t =:= typeOf[Array[Byte]] => map = map + (term.name.toString -> ((s: t) => if (s.isInstanceOf[SequenceType]) true else false))
+              case t if t =:= typeOf[Float] => map = map + (term.name.toString -> ((s: t) => if (s.isInstanceOf[TDouble]) true else false))
+              case t if t =:= typeOf[Double] => map = map + (term.name.toString -> ((s: t) => if (s.isInstanceOf[TDouble]) true else false))
+              case t if t =:= typeOf[Array[Float]] => map = map + (term.name.toString -> ((s: t) => if (s.isInstanceOf[SequenceType]) true else false))
+              case t if t =:= typeOf[Array[Double]] => map = map + (term.name.toString -> ((s: t) => if (s.isInstanceOf[SequenceType]) true else false))
+              case _ => throw new RuntimeException("Cannot process " + term.typeSignature + " type for variable " + term.name + " in " + decl + ".")
+            }
+          }
+        }
+      })
+    }
+    map
+  }
+
+  private val lireSiftToOpenIMAJKeyPointVarNameMap = Map("scale" -> "scale", "orientation" -> "ori", "location_x" -> "x", "location_y" -> "y", "descriptor" -> "ivec")
+
+  private def typeCheck(pirFeature: PirFeature, rules: Map[String, t => Boolean]): Unit = {
+
+    //If more rules exist than # of variables, fail
+    if (rules.size > pirFeature.map.size)
+      throw new RuntimeException("No enough variables have been included for typing rules, please check!")
+    pirFeature.map.map(elem => {
+      // No rule exists for a variable, we skip
+      if (rules(lireSiftToOpenIMAJKeyPointVarNameMap(elem._1)) != null) {
+        // Rule not check, fail  
+        if (!rules(lireSiftToOpenIMAJKeyPointVarNameMap(elem._1))(elem._2))
+          throw new RuntimeException(elem._2.getClass.getName + " does not satisify the type requirement " + rules(lireSiftToOpenIMAJKeyPointVarNameMap(elem._1)))
+      }
+    })
   }
 
   private def doubleToByteArray(in: Array[Double]): Array[Byte] = {
