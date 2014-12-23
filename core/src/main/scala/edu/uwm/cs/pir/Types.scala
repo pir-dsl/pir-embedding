@@ -5,23 +5,68 @@ package edu.uwm.cs.pir
  */
 
 trait Exp
+
+trait DomainType extends Exp
+sealed case class Document(name: String) extends DomainType
+sealed case class Image(name: String) extends Exp
+sealed case class Text(name: String) extends Exp
+
+trait FeatureType extends Exp
+sealed case class CEDD(name: String) extends FeatureType
+sealed case class FCTH(name: String) extends FeatureType
+sealed case class SIFT(name: String) extends FeatureType
+
+trait Compose[T] extends Exp
+sealed case class Histogram[T](name: String) extends Compose[T]
+sealed case class Distribution[T](name: String) extends Compose[T]
+
+trait Index[T] extends Exp
+sealed case class Lucene[T](name: String) extends Index[T]
+sealed case class KDTree[T](name: String) extends Index[T]
+
+
+trait Model[T] extends Exp
+sealed case class Cluster[T](name: String) extends Model[T]
+sealed case class LDA[T](name: String) extends Model[T]
+
+sealed case class Pair(e1: Exp, e2: Exp) extends Exp
+
 sealed case class Id(name: String) extends Exp
-sealed case class Lambda(x: String, e: Exp) extends Exp
 sealed case class Fun(e: Exp, e_1: Exp) extends Exp
+sealed case class Lambda(x: String, e: Exp) extends Exp
 sealed case class Let(x: String, e: Exp, e_1: Exp) extends Exp
 sealed case class Letrec(x: String, e: Exp, e_1: Exp) extends Exp
 
 object Exp {
   def toString(ast: Exp): String = {
-    var isId = false
+    var isVar = false
     val str = ast match {
-      case id: Id => { isId = true; id.name }
+      case doc: Document => { isVar = true; doc.name }
+      case img: Image => { isVar = true; img.name }
+      case txt: Text => { isVar = true; txt.name }
+      
+      case cedd: CEDD => { isVar = true; cedd.name }
+      case fcth: FCTH => { isVar = true; fcth.name }
+      case sift: SIFT => { isVar = true; sift.name }
+      
+      case hist: Histogram[t] => { isVar = true; hist.name }
+      case dist: Distribution[t] => { isVar = true; dist.name }
+      
+      case luc: Lucene[t] => { isVar = true; luc.name }
+      case kdt: KDTree[t] => { isVar = true; kdt.name }
+ 
+      case clu: Cluster[t] => { isVar = true; clu.name }
+      case lda: LDA[t] => { isVar = true; lda.name }
+      
+      case pair : Pair => {"(" + toString(pair.e1)  + ", " + toString(pair.e2) + ")"}
+      
+      case id: Id => { isVar = true; id.name }
       case l: Lambda => "fn " + l.x + " => " + toString(l.e)
       case f: Fun => toString(f.e) + " " + toString(f.e_1)
       case l: Let => "let " + l.x + " = " + toString(l.e) + " in " + toString(l.e_1)
       case lr: Letrec => "letrec " + lr.x + " = " + toString(lr.e) + " in " + toString(lr.e_1)
     }
-    if (isId) str else "(" + str + ")"
+    if (isVar) str else "(" + str + ")"
   }
 
 }
