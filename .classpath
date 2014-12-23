@@ -69,5 +69,7 @@
 	<classpathentry kind="lib" path="core/custom_lib/image-processing-1.4-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/JaFaMa-1.2.jar"/>
 	<classpathentry kind="lib" path="core/custom_lib/trove4j-3.0.2.jar"/>
+	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="target"/>
 </classpath>

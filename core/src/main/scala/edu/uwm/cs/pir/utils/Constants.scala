@@ -3,7 +3,7 @@ package edu.uwm.cs.pir.utils
 import edu.uwm.cs.pir.spark.SparkObject._
 //import edu.uwm.cs.pir.strategy.Strategy._
 
-package object Constants {
+object Constants {
     
     val DATA_ROOT = inputDataRoot
     val SAMPLES_ROOT = DATA_ROOT + "samples/"
