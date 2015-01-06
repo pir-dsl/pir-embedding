@@ -6,31 +6,6 @@ package edu.uwm.cs.pir
 
 trait Exp
 
-trait DomainType extends Exp
-sealed case class Document(name: String) extends DomainType
-sealed case class Image(name: String) extends Exp
-sealed case class Text(name: String) extends Exp
-
-trait FeatureType extends Exp
-sealed case class CEDD(name: String) extends FeatureType
-sealed case class FCTH(name: String) extends FeatureType
-sealed case class SIFT(name: String) extends FeatureType
-
-trait Compose[T] extends Exp
-sealed case class Histogram[T](name: String) extends Compose[T]
-sealed case class Distribution[T](name: String) extends Compose[T]
-
-trait Index[T] extends Exp
-sealed case class Lucene[T](name: String) extends Index[T]
-sealed case class KDTree[T](name: String) extends Index[T]
-
-
-trait Model[T] extends Exp
-sealed case class Cluster[T](name: String) extends Model[T]
-sealed case class LDA[T](name: String) extends Model[T]
-
-sealed case class Pair(e1: Exp, e2: Exp) extends Exp
-
 sealed case class Id(name: String) extends Exp
 sealed case class Fun(e: Exp, e_1: Exp) extends Exp
 sealed case class Lambda(x: String, e: Exp) extends Exp
@@ -41,25 +16,6 @@ object Exp {
   def toString(ast: Exp): String = {
     var isVar = false
     val str = ast match {
-      case doc: Document => { isVar = true; doc.name }
-      case img: Image => { isVar = true; img.name }
-      case txt: Text => { isVar = true; txt.name }
-      
-      case cedd: CEDD => { isVar = true; cedd.name }
-      case fcth: FCTH => { isVar = true; fcth.name }
-      case sift: SIFT => { isVar = true; sift.name }
-      
-      case hist: Histogram[t] => { isVar = true; hist.name }
-      case dist: Distribution[t] => { isVar = true; dist.name }
-      
-      case luc: Lucene[t] => { isVar = true; luc.name }
-      case kdt: KDTree[t] => { isVar = true; kdt.name }
- 
-      case clu: Cluster[t] => { isVar = true; clu.name }
-      case lda: LDA[t] => { isVar = true; lda.name }
-      
-      case pair : Pair => {"(" + toString(pair.e1)  + ", " + toString(pair.e2) + ")"}
-      
       case id: Id => { isVar = true; id.name }
       case l: Lambda => "fn " + l.x + " => " + toString(l.e)
       case f: Fun => toString(f.e) + " " + toString(f.e_1)
@@ -78,10 +34,34 @@ object TypeSystem {
   trait Type
   type Gamma = Map[String, Type]
 
-  sealed case class Var(id: Int) extends Type {
+  sealed class Var(id: Int) extends Type {
     var instance: Option[Type] = None
     lazy val name = nextUniqueName
   }
+
+  sealed class DomainType(id: Int) extends Var(id)
+  sealed case class Document(id: Int) extends DomainType(id)
+  sealed case class Image(id: Int) extends DomainType(id)
+  sealed case class Text(id: Int) extends DomainType(id)
+
+  sealed class FeatureType(id: Int) extends Var(id)
+  sealed case class CEDD(id: Int) extends FeatureType(id)
+  sealed case class FCTH(id: Int) extends FeatureType(id)
+  sealed case class SIFT(id: Int) extends FeatureType(id)
+
+  sealed class Compose[T](id: Int) extends Var(id)
+  sealed case class Histogram[T](id: Int) extends Compose[T](id)
+  sealed case class Distribution[T](id: Int) extends Compose[T](id)
+
+  sealed class Index[T](id: Int) extends Var(id)
+  sealed case class Lucene[T](id: Int) extends Index[T](id)
+  sealed case class KDTree[T](id: Int) extends Index[T](id)
+
+  sealed class Model[T](id: Int) extends Var(id)
+  sealed case class Cluster[T](id: Int) extends Model[T](id)
+  sealed case class LDA[T](id: Int) extends Model[T](id)
+
+  sealed case class Pair(t1: Type, t2: Type) extends Type
 
   sealed case class Operator(name: String, args: Seq[Type]) extends Type
 
@@ -100,22 +80,48 @@ object TypeSystem {
   def newVar: Var = {
     val result = nextVarId
     nextVarId += 1
-    Var(result)
+    new Var(result)
   }
 
-  def toString(t: Type): String = t match {
-    case v: Var => v.instance match {
-      case Some(i) => toString(i)
-      case None => v.name
+  def toString(t: Type): String = {
+    var isVar = false
+    val str = t match {
+      case doc: Document => doc.instance match {
+        case Some(i) => toString(i)
+        case None => doc.name
+      }
+      case img: Image => { isVar = true; img.name }
+      case txt: Text => { isVar = true; txt.name }
+
+      case cedd: CEDD => { isVar = true; cedd.name }
+      case fcth: FCTH => { isVar = true; fcth.name }
+      case sift: SIFT => { isVar = true; sift.name }
+
+      case hist: Histogram[t] => { isVar = true; hist.name }
+      case dist: Distribution[t] => { isVar = true; dist.name }
+
+      case luc: Lucene[t] => { isVar = true; luc.name }
+      case kdt: KDTree[t] => { isVar = true; kdt.name }
+
+      case clu: Cluster[t] => { isVar = true; clu.name }
+      case lda: LDA[t] => { isVar = true; lda.name }
+
+      //case pair : Pair => {"(" + toString(pair.e1)  + ", " + toString(pair.e2) + ")"}
+
+      case v: Var => v.instance match {
+        case Some(i) => toString(i)
+        case None => v.name
+      }
+      case Operator(name, args) => {
+        if (args.length == 0)
+          name
+        else if (args.length == 2)
+          "(" + toString(args(0)) + " " + name + " " + toString(args(1)) + ")"
+        else
+          args.mkString(name + " ", " ", "")
+      }
     }
-    case Operator(name, args) => {
-      if (args.length == 0)
-        name
-      else if (args.length == 2)
-        "(" + toString(args(0)) + " " + name + " " + toString(args(1)) + ")"
-      else
-        args.mkString(name + " ", " ", "")
-    }
+    if (isVar) str else "(" + str + ")"
   }
 
   def analyze(ast: Exp, gamma: Gamma): Type = analyze(ast, gamma, Set.empty)
